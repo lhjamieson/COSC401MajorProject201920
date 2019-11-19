@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<script>
+    function search() {
+        alert("search");
+    }
+    function button1() {
+        alert("upload1");
+    }
+    function button2() {
+        alert("upload2");
+    }
+</script>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top headerChange">
+        <ul style="margin-top: -20px;" class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="#">Log In</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Log Out</a></li>
+        </ul>
+
+        <ul style="margin-top: -10px;" class="ml-auto">
+            <li class="row pr-5">
+                <input class="inputChange" type="search" width="80" height="50">
+                <button class="search-button" type="submit" onclick="search()"><img src="~/Logos/search.png" /></button>
+            </li>
+        </ul>
+    </nav>
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+    <nav class="navbar fixed-bottom footerChange">
+        <ul style="margin-top: 15px;" class="ml-auto">
+            <li class="row pr-5">
+                <button style="padding-right: 50px;" class="search-button uploadButton1" type="submit" onclick="button1()"><img src="~/Logos/upload.png" /></button>
+                <button class="search-button uploadButton2" type="submit" onclick="button2()">Upload</button>
+            </li>
+        </ul>
+    </nav>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
