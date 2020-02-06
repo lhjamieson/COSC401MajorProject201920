@@ -1,0 +1,96 @@
+/*
+================not used:================
+.file-explorer {
+    padding-top: 5%;
+    padding-left: 20%;
+    width: 70%;
+}
+    
+.list-group {
+   height: 350px;
+   overflow-y: auto;
+   margin: 0px;
+}
+
+.list-group-item:hover {
+    background-color: lightgray;
+}
+
+.list-group-item {
+    color: black;
+    background-color: whitesmoke;
+}
+
+.input-style {
+    border: 2px solid white;
+    border-radius: 5px;
+    background: none;
+    height: 48px;
+    width: 300px;
+    padding-right: 50px;
+}
+*/
+
+.GreenWell-Nav-Menu {
+    background-image: url('./logos/navbar.png');
+    height: 100px;
+    background-color: transparent;
+    border: none;
+}
+
+.upload-Button1 {
+    border: 2px solid white;
+    border-radius: 5px;
+    background-color: #73a353;
+    height: 55px;
+    padding-right: 50px;
+}
+
+.upload-Button2 {
+    background-color: #73a353;
+    border: 2px solid;
+    border-radius: 5px;
+    color: white;
+    width: 300px;
+    font-size: 30px;
+    height: 55px;
+}
+
+.search-button {
+    margin-left: -50px;
+    background: none;
+    color: black;
+    border: 0;
+    color: transparent;
+}
+
+.search-button:hover {        
+    background-color: transparent;
+}
+
+.upload-footer {
+    position: fixed;
+    bottom: 0;
+    width: 99%;
+    padding-bottom: 15px;
+}
+
+.div-files {
+    margin-top: 20px;
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: whitesmoke;
+}
+
+input.form-control-file:hover {
+    background-color: #6c757d;
+    cursor: pointer;
+}
+
+form-control-file {
+    display: none;
+}
+
+input.form-control-file {
+    display: none;
+}
