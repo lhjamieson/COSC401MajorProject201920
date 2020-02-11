@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 
+//File related functionality
 namespace Greenwell.Controllers
 {
     [Route("api/[controller]")]
@@ -21,12 +22,14 @@ namespace Greenwell.Controllers
             _context = context;
         }
 
+        //Return all files
         [HttpGet("[action]")]
         public ActionResult GetAllFiles()
         {
             return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
         }
 
+        //Create directory for file storage on host device
         [HttpGet("[action]")]
         public ActionResult CreateLocalStorage()
         {
@@ -39,15 +42,19 @@ namespace Greenwell.Controllers
             return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList() });
         }
 
+        //Search for file
         [HttpPost("Search")]
         public ActionResult Search([FromBody] string[] data)
         {
+            //Search by filename
             if (data[1].Trim() == "fileName")
             {
+                //if empty search bar, display all files
                 if (data[0].Trim() == "")
                 {
                     return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
                 }
+                //list of all files that begin with the search query
                 var fs = _context.Files.Where(a => a.Filename.StartsWith(data[0].Trim())).Select(p => p.Filename).ToList();
                 if (fs.Count() == 0)
                 {
@@ -59,6 +66,9 @@ namespace Greenwell.Controllers
             {
                 return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
             }
+            //Search by tag
+
+            //list of files that have the queried tag
             var res1 = _context.Tags.Include(a => a.Tagmap).Where(a => a.TagName == data[0]).Select(a => a.TagId).ToList();
             var res2 = _context.Tagmap.Include(a => a.File).Where(a => res1.Contains(a.TagId)).ToList();
             var files = res2.Select(a => a.File).Select(a => a.Filename).ToList();
@@ -228,15 +238,18 @@ namespace Greenwell.Controllers
             }
         }
 
+        //Delete folder
         [HttpPost("DeleteAFolder")]
         public async Task<ActionResult> DeleteAFolder([FromForm] string folderPath)
         {
             try
             {
+                //list of all paths with folder in it
                 var path = _context.Files.Where(a => a.FullPath.StartsWith(folderPath)).ToList();
 
                 for (int i = 0; i < path.Count; i++)
                 {
+                    //remove paths
                     _context.Files.Remove(path[i]);
                     await _context.SaveChangesAsync();
                 }
@@ -253,11 +266,13 @@ namespace Greenwell.Controllers
             }
         }
 
+        //Delete file
         [HttpPost("DeleteAFile")]
         public async Task<ActionResult> DeleteAFile([FromBody] string p)
         {
             try
             {
+                //remove all instances of file in database, and delete from local storage
                 int id = _context.Files.SingleOrDefault(a => a.Filename == System.IO.Path.GetFileName(p)).FileId;
                 _context.RemoveRange(_context.Tagmap.Where(a => a.FileId == id));
                 await _context.SaveChangesAsync();
@@ -276,15 +291,18 @@ namespace Greenwell.Controllers
             }
         }
 
+        //Rename folder
         [HttpPost("RenameAFolder")]
         public async Task<ActionResult> RenameAFolder([FromBody] string[] p)
         {
             try
             {
+                //list of all paths that include the folder
                 var path = _context.Files.Where(a => a.FullPath.StartsWith(p[0])).ToList();
 
                 for (int i = 0; i < path.Count; i++)
                 {
+                    //replace each old path with new path
                     path[i].FullPath = path[i].FullPath.Replace(p[0], p[1]);
                     _context.Files.Update(path[i]);
                     await _context.SaveChangesAsync();
@@ -303,11 +321,13 @@ namespace Greenwell.Controllers
             }
         }
 
+        //Rename file
         [HttpPost("RenameAFile")]
         public async Task<ActionResult> RenameAFile([FromBody] string[] p)
         {
             try
             {
+                //Create path with new name, then update database and local files
                 var path = _context.Files.FirstOrDefault(a => a.FullPath.StartsWith(p[0]));
                 path.FullPath = p[1];
                 path.Filename = System.IO.Path.GetFileName(p[1]);
