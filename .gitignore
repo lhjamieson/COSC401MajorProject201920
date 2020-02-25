@@ -1,0 +1,8 @@
+#ignore .vs/ files
+
+.vs/
+
+#ignore vs extras
+
+GreenWell.Data/bin/
+GreenWell.Data/obj/
