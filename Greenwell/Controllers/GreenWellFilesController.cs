@@ -91,8 +91,8 @@ namespace Greenwell.Controllers
                 if (!string.IsNullOrEmpty(tags[0]))
                 {
                     if (tags[0].Contains(",")) tags = tags[0].Split(",");
-                    Greenwell.Data.Models.Tags ts; 
-                    
+                    Greenwell.Data.Models.Tags ts;
+
                     //Add the tags to the ids list for use later.
                     for (int i = 0; i < tags.Length; i++)
                     {
@@ -133,7 +133,7 @@ namespace Greenwell.Controllers
                         await _context.SaveChangesAsync();
                     }
                 }
-                
+
                 //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
                 //We then use this path to save to, creating a relationship between the file and the local storage.
                 string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage";
@@ -146,7 +146,7 @@ namespace Greenwell.Controllers
                     stream.Dispose();
                 }
             }
-            
+
             //If we receive error code 500, then something with the server went wrong. It's not specific, but
             //we can catch it and ask them to retry uploading the file.
             catch (Exception e)
@@ -170,7 +170,7 @@ namespace Greenwell.Controllers
                     string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
                     string finalPath = localStorage + @"\" + path;
                     if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
-                    
+
                     //Here we try to make a connection with the Database to begin to save there. If we don't get a connection, we get
                     //a 500 error.
                     try
@@ -210,7 +210,7 @@ namespace Greenwell.Controllers
                     {
                         FullPath = p[0],
                         Filename = System.IO.Path.GetFileName(p[0])
-                };
+                    };
                     await _context.Files.AddAsync(file);
                     await _context.SaveChangesAsync();
 
@@ -233,7 +233,7 @@ namespace Greenwell.Controllers
         [HttpPost("AddAFolder")]
         public async Task<ActionResult> AddAFolder([FromForm] string folderPath)
         {
-        
+
             //second verse, same as the first...
             //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
             //Here we check if the folder already exists in the path. This is triggered only by having the same path as 
@@ -370,7 +370,7 @@ namespace Greenwell.Controllers
             }
         }
 
-//===================================================== For Development /=========================================================// 
+        //===================================================== For Development /=========================================================// 
         //[HttpPost("GetFilesFromGivenPath")]
         //public async Task<ActionResult> GetFilesFromGivenPath([FromBody] string path)
         //{

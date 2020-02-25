@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
-import { Col, Container, Row, Form, FormControl, Button, Image } from 'react-bootstrap';
+import { Container } from 'reactstrap';
+import { NavMenu } from './NavMenu';
 
 export class Layout extends Component {
-  displayName = Layout.name
+  static displayName = Layout.name;
 
-    render() {
-      return (
-          <React.Fragment>
-          <Container style={{padding: "0px"}} fluid>
+  render () {
+    return (
+      <div>
+        <NavMenu />
+         <Container style={{ padding: "0px" }} fluid>
           {this.props.children}
-          </Container>
-          </React.Fragment>
+        </Container>
+      </div>
     );
   }
 }
-
