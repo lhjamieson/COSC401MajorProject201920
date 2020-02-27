@@ -1,10 +1,3 @@
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.deps.json
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.dll
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.pdb
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfoInputs.cache
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.dll
-C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.pdb
 C:\Users\th3wa\source\repos\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.deps.json
 C:\Users\th3wa\source\repos\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.dll
 C:\Users\th3wa\source\repos\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.pdb
@@ -12,3 +5,10 @@ C:\Users\th3wa\source\repos\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Dat
 C:\Users\th3wa\source\repos\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
 C:\Users\th3wa\source\repos\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.dll
 C:\Users\th3wa\source\repos\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.pdb
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.deps.json
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.pdb
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfoInputs.cache
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.pdb
