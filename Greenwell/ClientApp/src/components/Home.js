@@ -11,8 +11,7 @@ import '../Typeahead.css';
 import uploadButton from '../logos/upload.png';
 import searchButton from '../logos/search.png';
 
-export class Home extends Component
-{
+export class Home extends Component {
     static displayName = Home.name;
 
     constructor(props) {
@@ -538,7 +537,7 @@ export class Home extends Component
                 );
             }
             let content;
-            if (!loading) {
+            if (loading) {
                 content =
                     (
                         <div style={{ paddingLeft: "40px", marginTop: "20px" }}>
