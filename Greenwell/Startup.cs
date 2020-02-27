@@ -4,6 +4,7 @@ using Greenwell.Data.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -44,6 +45,11 @@ namespace Greenwell
                      }
                  )
              );
+
+            services.AddDbContext<GreenwellUserContext>(options =>
+      options.UseSqlServer(
+          Configuration.GetConnectionString("DefaultConnection")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,8 +69,9 @@ namespace Greenwell
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
             app.UseRouting();
-            app.UseAuthentication();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
