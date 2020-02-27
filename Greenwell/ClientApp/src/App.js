@@ -6,17 +6,19 @@ import { FetchData } from './components/FetchData';
 import { Counter } from './components/Counter';
 import AuthorizeRoute from './components/api-authorization/AuthorizeRoute';
 import ApiAuthorizationRoutes from './components/api-authorization/ApiAuthorizationRoutes';
+import AdminAccess from './components/AdminPage';
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 
 export default class App extends Component {
-  static displayName = App.name;
+    static displayName = App.name;
 
-  render () {
-    return (
-      <Layout>
-        <Route exact path='/' component={Home} />
-        <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
-      </Layout>
-    );
-  }     
+    render() {
+        return (
+            <Layout>
+                <Route exact path='/' component={Home} />
+                <Route exact path='/admin' component={AdminAccess} />
+                <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
+            </Layout>
+        );
+    }
 }
