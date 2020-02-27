@@ -11,9 +11,8 @@ import '../Typeahead.css';
 import uploadButton from '../logos/upload.png';
 import searchButton from '../logos/search.png';
 
-export class Home extends Component
-{
-    static displayName = Home.name;
+export class Home extends Component {
+    displayName = Home.name
 
     constructor(props) {
         super(props);
@@ -31,39 +30,38 @@ export class Home extends Component
             tagsForFilter: []
         };
 
-
         fetch('api/GreenWellFiles/CreateLocalStorage');
 
-        fetch('api/GreenWellFiles/GetAllFiles')
-            .then(response => response.json())
-            .then(data => {
-                if (data.files.length == 0) {
-                    this.setState({
-                        loading: false,
-                        //noFiles: true,
-                        //filesLoaded: false,
-                        files: [],
-                        tagsForFilter: []
-                    });
-                }
-                else {
-                    var i;
-                    var t = [];
-                    for (i = 0; i < data.files.length; i++) {
-                        var r1 = {
-                            key: data.files[i]
-                        };
-                        t.push(r1);
-                    }
-                    this.setState({
-                        loading: false,
-                        //filesLoaded: true,
-                        //noFiles: false,
-                        files: t,
-                        tagsForFilter: data.tags
-                    });
-                }
-            });
+        fetch('api/GreenWellFiles/GetAllFiles');
+    //        .then(response => response.json())
+    //        .then(data => {
+    //            if (data.files.length == 0) {
+    //                this.setstate({
+    //                    loading: false,
+    //                    //nofiles: true,
+    //                    //filesloaded: false,
+    //                    files: [],
+    //                    tagsforfilter: []
+    //                });
+    //            }
+    //            else {
+    //                var i;
+    //                var t = [];
+    //                for (i = 0; i < data.files.length; i++) {
+    //                    var r1 = {
+    //                        key: data.files[i]
+    //                    };
+    //                    t.push(r1);
+    //                }
+    //                this.setstate({
+    //                    loading: false,
+    //                    //filesloaded: true,
+    //                    //nofiles: false,
+    //                    files: t,
+    //                    tagsforfilter: data.tags
+    //                });
+    //            }
+    //        });
     }
 
     componentDidUpdate() {
@@ -415,6 +413,10 @@ export class Home extends Component
 
     }
 
+    handleKeyPress = () => {
+        this.Search(document.getElementById("search").value)
+    }
+
     handleAddFileFromUpload = () => {
         let tags = [];
         if (!this.state.tagsForFileUpload.length == 0) {
@@ -489,151 +491,129 @@ export class Home extends Component
     }
 
     render() {
-        {
-            const { loading, changeModalBody, uploadFile, uploadFileName, uploadFilePath, tagsForFilter } = this.state;
-            let modalHeader;
-            let modalBody;
-            if (uploadFileName === "") {
-                modalHeader = (
-                    <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
-                        <Modal.Title>No File Selected.</Modal.Title>
-                    </Modal.Header>
-                );
-                modalBody = (
-                    null
-                );
-            }
-            if (uploadFileName !== "") {
-                modalHeader = (
-                    <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
-                        <Modal.Title>{uploadFileName}</Modal.Title>
-                    </Modal.Header>
-                );
-                modalBody = (
-                    <Typeahead
-                        id="tags"
-                        onChange={(x) => this.setState({ tagsForFileUpload: x })}
-                        multiple
-                        allowNew
-                        placeholder="Add Tags (optional)"
-                        options={tagsForFilter}
-                        selectHintOnEnter={true}
-                        ref={(ref) => this._typeahead = ref}
-                    />
-                );
-            }
-            let browseOrUpload;
-            if (uploadFileName === "") {
-                browseOrUpload = (
-                    <Button variant="secondary" onClick={() => this.openBrowseDialog(document.getElementById("dialog"))}>
-                        Browse
-            </Button>
-                );
-            }
-            if (uploadFileName !== "") {
-                browseOrUpload = (
-                    <Button variant="secondary" onClick={() => this.handleAddFileFromUpload()}>
-                        Upload
-                </Button>
-                );
-            }
-            let content;
-            if (!loading) {
-                content =
-                    (
-                        <div style={{ paddingLeft: "40px", marginTop: "20px" }}>
-                            <h1>Loading</h1>
-                            < FontAwesomeIcon className="fa-2x" icon={faSpinner} pulse />
-                        </div>
-                    );
-            }
-            //    if (noFiles && !loading) {
-            //        content =
-            //            (
-            //                <Container style={{ marginTop: "18%", padding: "0px", marginLeft: "32%", marginRight: "0px" }}>
-            //                    <InputGroup>
-            //                        <Button onClick={() => this.fetchPathFiles(document.getElementById("inputPath").value)}>Fetch</Button>
-            //                        <FormControl id="inputPath" style={{ maxWidth: "40%" }}
-            //                            required
-            //                            placeholder=":Path"
-            //                            aria-describedby="basic-addon1"
-            //                        />
-            //                    </InputGroup>
-            //                </Container>
-            //            );
-
-            //}
-
-            if (!loading) {
-                content =
-                    (
-                        <React.Fragment>
-                            <div id="file_browser" className="div-files">
-                                <FileBrowser /*className="react-keyed-file-browser"*/
-                                    files={this.state.files}
-                                    icons={{
-                                        File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
-                                        Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
-                                        PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
-                                        Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
-                                        Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
-                                        FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
-                                        Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
-                                        Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
-                                    }}
-                                    onCreateFolder={this.handleCreateFolder}
-                                    onDeleteFolder={this.handleDeleteFolder}
-                                    onRenameFolder={this.handleRenameFolder}
-                                    onRenameFile={this.handleRenameFile}
-                                    onDeleteFile={this.handleDeleteFile}
-                                    onCreateFiles={this.handleCreateFiles}
-
-                                //onMoveFolder={this.handleRenameFolder}
-                                //onMoveFile={this.handleRenameFolder}
-                                />
-                            </div>
-                            <Modal show={this.state.showModal} onHide={this.handleModalClose}>
-                                {modalHeader}
-                                {modalBody}
-                                <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
-                                    <Button variant="secondary" onClick={this.handleModalClose}>
-                                        Close
-                                 </Button>
-                                    {browseOrUpload}
-                                    <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
-                                </Modal.Footer>
-                            </Modal>
-                            <Footer handleModalShow={this.handleModalShow} />
-                        </React.Fragment>
-                    );
-            }
-            return (
-                <div>
-                    <GreenWellNavMenu setParentForFiles={this.setFiles} />
-                    {content}
-                </div>
+        const { loading, changeModalBody, uploadFile, uploadFileName, uploadFilePath, tagsForFilter } = this.state;
+        let modalHeader;
+        let modalBody;
+        if (uploadFileName === "") {
+            modalHeader = (
+                <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
+                    <Modal.Title>No File Selected.</Modal.Title>
+                </Modal.Header>
+            );
+            modalBody = (
+                null
             );
         }
+        if (uploadFileName !== "") {
+            modalHeader = (
+                <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
+                    <Modal.Title>{uploadFileName}</Modal.Title>
+                </Modal.Header>
+            );
+            modalBody = (
+                <Typeahead
+                    id="tags"
+                    onChange={(x) => this.setState({ tagsForFileUpload: x })}
+                    multiple
+                    allowNew
+                    placeholder="Add Tags (optional)"
+                    options={tagsForFilter}
+                    selectHintOnEnter={true}
+                    ref={(ref) => this._typeahead = ref}
+                />
+            );
+        }
+        let browseOrUpload;
+        if (uploadFileName === "") {
+            browseOrUpload = (
+                <Button variant="secondary" onClick={() => this.openBrowseDialog(document.getElementById("dialog"))}>
+                    Browse
+            </Button>
+            );
+        }
+        if (uploadFileName !== "") {
+            browseOrUpload = (
+                <Button variant="secondary" onClick={() => this.handleAddFileFromUpload()}>
+                    Upload
+                </Button>
+            );
+        }
+        let content;
+        if (loading) {
+            content =
+                (
+                    <div style={{ paddingLeft: "40px", marginTop: "20px" }}>
+                        <h1>Loading</h1>
+                        < FontAwesomeIcon className="fa-2x" icon={faSpinner} pulse />
+                    </div>
+                );
+        }
+        //    if (noFiles && !loading) {
+        //        content =
+        //            (
+        //                <Container style={{ marginTop: "18%", padding: "0px", marginLeft: "32%", marginRight: "0px" }}>
+        //                    <InputGroup>
+        //                        <Button onClick={() => this.fetchPathFiles(document.getElementById("inputPath").value)}>Fetch</Button>
+        //                        <FormControl id="inputPath" style={{ maxWidth: "40%" }}
+        //                            required
+        //                            placeholder=":Path"
+        //                            aria-describedby="basic-addon1"
+        //                        />
+        //                    </InputGroup>
+        //                </Container>
+        //            );
 
-        //  return (
-        //    <div>
-        //      <h1>Hello, world!</h1>
-        //      <p>Welcome to your new single-page application, built with:</p>
-        //      <ul>
-        //        <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-        //        <li><a href='https://facebook.github.io/react/'>React</a> for client-side code</li>
-        //        <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-        //      </ul>
-        //      <p>To help you get started, we have also set up:</p>
-        //      <ul>
-        //        <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-        //        <li><strong>Development server integration</strong>. In development mode, the development server from <code>create-react-app</code> runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-        //        <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration produces minified, efficiently bundled JavaScript files.</li>
-        //      </ul>
-        //      <p>The <code>ClientApp</code> subdirectory is a standard React application based on the <code>create-react-app</code> template. If you open a command prompt in that directory, you can run <code>npm</code> commands such as <code>npm test</code> or <code>npm install</code>.</p>
-        //    </div>
-        //  );
         //}
+
+        if (!loading) {
+            content =
+                (
+                    <React.Fragment>
+                        <div id="file_browser" className="div-files">
+                            <FileBrowser /*className="react-keyed-file-browser"*/
+                                files={this.state.files}
+                                icons={{
+                                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                                }}
+                                onCreateFolder={this.handleCreateFolder}
+                                onDeleteFolder={this.handleDeleteFolder}
+                                onRenameFolder={this.handleRenameFolder}
+                                onRenameFile={this.handleRenameFile}
+                                onDeleteFile={this.handleDeleteFile}
+                                onCreateFiles={this.handleCreateFiles}
+
+                            //onMoveFolder={this.handleRenameFolder}
+                            //onMoveFile={this.handleRenameFolder}
+                            />
+                        </div>
+                        <Modal show={this.state.showModal} onHide={this.handleModalClose}>
+                            {modalHeader}
+                            {modalBody}
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                                <Button variant="secondary" onClick={this.handleModalClose}>
+                                    Close
+                                 </Button>
+                                {browseOrUpload}
+                                <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
+                            </Modal.Footer>
+                        </Modal>
+                        <Footer handleModalShow={this.handleModalShow} />
+                    </React.Fragment>
+                );
+        }
+        return (
+            <div>
+                <GreenWellNavMenu setParentForFiles={this.setFiles} />
+                {content}
+            </div>
+        );
     }
 }
 
@@ -688,12 +668,19 @@ class GreenWellNavMenu extends Component {
                             <Dropdown.Item eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Form inline>
-                        <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white" }} type="text" placeholder="Search" />
-                        <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
-                            <Image src={searchButton} />
-                        </Button>
-                    </Form>
+                    <InputGroup>
+                        <Form inline>
+                            <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white", width: "200px" }} type="text" placeholder="Search"
+                                onKeyPress={event => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault();
+                                    }
+                                }} />
+                            <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
+                                <Image src={searchButton} />
+                            </Button>
+                        </Form>
+                    </InputGroup>
                 </Nav>
             </Navbar>
         );
