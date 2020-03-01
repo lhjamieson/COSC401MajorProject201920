@@ -39,9 +39,9 @@ namespace Greenwell
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(
-            //        Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDbContext<greenwelldatabaseContext>(
              options =>
