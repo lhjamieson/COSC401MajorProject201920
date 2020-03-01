@@ -80,7 +80,7 @@ export class Home extends Component {
                 do {
                     if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
                         foundParent = true;
-                    }   
+                    }
 
                     const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
                     path = folderName + "/" + path;
@@ -94,7 +94,7 @@ export class Home extends Component {
             }
         }, 100);
     }
-    
+
     //fetchPathFiles = (val) => {
     //    this.setState({
     //        loading: true
@@ -410,7 +410,7 @@ export class Home extends Component {
             uploadFile: files[0],
             uploadFileName: files[0].name
         });
-        
+
     }
 
     handleAddFileFromUpload = () => {
@@ -516,7 +516,7 @@ export class Home extends Component {
                     options={tagsForFilter}
                     selectHintOnEnter={true}
                     ref={(ref) => this._typeahead = ref}
-                 />
+                />
             );
         }
         let browseOrUpload;
@@ -558,15 +558,15 @@ export class Home extends Component {
         //                    </InputGroup>
         //                </Container>
         //            );
-                    
+
         //}
 
-            if (!loading) {
-                content =
-                    (
-                      <React.Fragment>
+        if (!loading) {
+            content =
+                (
+                    <React.Fragment>
                         <div id="file_browser" className="div-files">
-                            <FileBrowser /*className="react-keyed-file-browser"*/ 
+                            <FileBrowser /*className="react-keyed-file-browser"*/
                                 files={this.state.files}
                                 icons={{
                                     File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
@@ -600,16 +600,16 @@ export class Home extends Component {
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
-                        <Footer handleModalShow={this.handleModalShow}/>
-                      </React.Fragment>
-                    );
+                        <Footer handleModalShow={this.handleModalShow} />
+                    </React.Fragment>
+                );
         }
         return (
-                <div>
+            <div>
                 <GreenWellNavMenu setParentForFiles={this.setFiles} />
-                    {content}
-                </div>
-            );
+                {content}
+            </div>
+        );
     }
 }
 
@@ -693,7 +693,7 @@ class Footer extends Component {
     render() {
         return (
             <div className="upload-footer">
-                <UploadButton handleModalShow={this.props.handleModalShow}/>
+                <UploadButton handleModalShow={this.props.handleModalShow} />
             </div>
         );
     }

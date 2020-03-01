@@ -33,7 +33,7 @@ namespace Greenwell.Controllers
         [HttpGet("[action]")]
         public ActionResult CreateLocalStorage()
         {
-            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
             if (Directory.Exists(localStorage))
             {
                 return Ok(new { status = "Local Storage already exists." });
