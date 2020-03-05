@@ -13,8 +13,14 @@ export default class App extends Component {
 
   render () {
     return (
-      <Layout>
-        <AuthorizeRoute exact path='/' component={Home} />
+        <Layout>
+            {/*Switching to AuthorizeRoute like before forces the user to login before they see the homepage, 
+             * however for testing of the homepage it can be tedious to login every time so for now it will remain an UnauthorizedRoute
+             * <AuthorizeRoute exact path='/' component={Home} />*/}
+            
+            <Route exact path='/' component={Home} />
+
+        
         <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
       </Layout>
     );
