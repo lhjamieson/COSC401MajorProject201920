@@ -1,0 +1,79 @@
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+code {
+  color: #E01A76;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+
+.GreenWell-Nav-Menu {
+    background-image: url('./logos/navbar.png');
+    height: 100px;
+    background-color: transparent;
+    border: none;
+}
+
+.upload-Button1 {
+    border: 2px solid white;
+    border-radius: 5px;
+    background-color: #73a353;
+    height: 55px;
+    padding-right: 50px;
+}
+
+.upload-Button2 {
+    background-color: #73a353;
+    border: 2px solid;
+    border-radius: 5px;
+    color: white;
+    width: 300px;
+    font-size: 30px;
+    height: 55px;
+}
+
+.search-button {
+    margin-left: -50px;
+    background: none;
+    color: black;
+    border: 0;
+    color: transparent;
+}
+
+    .search-button:hover {
+        background-color: transparent;
+    }
+
+.upload-footer {
+    position: fixed;
+    bottom: 0;
+    width: 99%;
+    padding-bottom: 15px;
+}
+
+.div-files {
+    margin-top: 20px;
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: whitesmoke;
+}
+
+input.form-control-file:hover {
+    background-color: #6c757d;
+    cursor: pointer;
+}
+
+form-control-file {
+    display: none;
+}
+
+input.form-control-file {
+    display: none;
+}
