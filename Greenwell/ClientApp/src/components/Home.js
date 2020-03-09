@@ -413,6 +413,10 @@ export class Home extends Component {
 
     }
 
+    handleKeyPress = () => {
+        this.Search(document.getElementById("search").value)
+    }
+
     handleAddFileFromUpload = () => {
         let tags = [];
         if (!this.state.tagsForFileUpload.length == 0) {
@@ -664,12 +668,19 @@ class GreenWellNavMenu extends Component {
                             <Dropdown.Item eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Form inline>
-                        <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white" }} type="text" placeholder="Search" />
-                        <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
-                            <Image src={searchButton} />
-                        </Button>
-                    </Form>
+                    <InputGroup>
+                        <Form inline>
+                            <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white", width: "200px" }} type="text" placeholder="Search"
+                                onKeyPress={event => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault();
+                                    }
+                            }}/>
+                            <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
+                                <Image src={searchButton} />
+                            </Button>
+                        </Form>
+                    </InputGroup>
                 </Nav>
             </Navbar>
         );
