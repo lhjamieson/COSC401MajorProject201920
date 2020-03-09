@@ -21,7 +21,8 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.3.0",
     "reactstrap": "^6.3.0",
-    "rimraf": "^3.0.0"
+    "rimraf": "^3.0.0",
+    "file-saver": "2.0.2"
   },
   "devDependencies": {
     "ajv": "^6.9.1",
