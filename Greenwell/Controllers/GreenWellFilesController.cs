@@ -33,7 +33,7 @@ namespace Greenwell.Controllers
         [HttpGet("[action]")]
         public ActionResult CreateLocalStorage()
         {
-            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
             if (Directory.Exists(localStorage))
             {
                 return Ok(new { status = "Local Storage already exists." });
@@ -136,7 +136,7 @@ namespace Greenwell.Controllers
                 
                 //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
                 //We then use this path to save to, creating a relationship between the file and the local storage.
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage";
                 path = path.Replace("/", @"\");
                 string finalPath = @localStorage + @"\" + @path;
 
@@ -167,7 +167,7 @@ namespace Greenwell.Controllers
                 for (int i = 0; i < p.Length; i++)
                 {
                     string path = p[i];
-                    string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                    string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                     string finalPath = localStorage + @"\" + path;
                     if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
                     
@@ -200,7 +200,7 @@ namespace Greenwell.Controllers
             else
             {
                 string path = p[0];
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                 string finalPath = localStorage + @"\" + path;
                 if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
 
@@ -238,7 +238,7 @@ namespace Greenwell.Controllers
             //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
             //Here we check if the folder already exists in the path. This is triggered only by having the same path as 
             //another folder. Much like other file systems, if the name isn't EXACTLY the same, it'll allow you to save it.
-            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
             string finalPath = localStorage + @"\" + folderPath;
             if (Directory.Exists(finalPath)) return StatusCode(500, new { message = "The folder exists already.", status = "500" });
 
@@ -277,7 +277,7 @@ namespace Greenwell.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                 string finalPath = localStorage + @"\" + folderPath;
 
                 Directory.Delete(finalPath, true);
@@ -302,7 +302,7 @@ namespace Greenwell.Controllers
                 _context.Files.Remove(_context.Files.SingleOrDefault(a => a.Filename == System.IO.Path.GetFileName(p)));
                 await _context.SaveChangesAsync();
 
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                 string finalPath = localStorage + @"\" + p;
 
                 System.IO.File.Delete(finalPath);
@@ -331,7 +331,7 @@ namespace Greenwell.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                 string oldFinalPath = localStorage + @"\" + p[0];
                 string newFinalPath = localStorage + @"\" + p[1];
 
@@ -357,7 +357,7 @@ namespace Greenwell.Controllers
                 _context.Files.Update(path);
                 await _context.SaveChangesAsync();
 
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocatStorage\";
+                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
                 string oldFinalPath = localStorage + @"\" + p[0];
                 string newFinalPath = localStorage + @"\" + p[1];
 
@@ -370,7 +370,21 @@ namespace Greenwell.Controllers
             }
         }
 
-//===================================================== For Development /=========================================================// 
+        [HttpPost("DownloadAFile")]
+        public IActionResult DownloadFile([FromForm] string filePath)
+        {
+            var net = new System.Net.WebClient();
+            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage";
+            filePath = filePath.Replace("/", @"\");
+            string finalPath = @localStorage + @"\" + @filePath;
+            var data = net.DownloadData(finalPath);
+            var content = new System.IO.MemoryStream(data);
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "ahmed.jpeg";
+            return File(content, contentType, fileName);
+        }
+
+        //===================================================== For Development /=========================================================// 
         //[HttpPost("GetFilesFromGivenPath")]
         //public async Task<ActionResult> GetFilesFromGivenPath([FromBody] string path)
         //{

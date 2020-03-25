@@ -10,6 +10,7 @@ import '../react-keyed-file-browser.css';
 import '../Typeahead.css';
 import uploadButton from '../logos/upload.png';
 import searchButton from '../logos/search.png';
+import { saveAs } from 'file-saver';
 
 export class Home extends Component {
     displayName = Home.name
@@ -27,7 +28,11 @@ export class Home extends Component {
             uploadFilePath: "",
             tagsForFileUpload: [],
             changeModalBody: false,
-            tagsForFilter: []
+            tagsForFilter: [],
+
+            downloadFileName: "",
+            uploading: false
+
         };
 
         fetch('api/GreenWellFiles/CreateLocalStorage');
@@ -64,37 +69,97 @@ export class Home extends Component {
             });
     }
 
+    componentDidMount() {
+        document.addEventListener("click", this.clicked);
+    }
+
+
+
+    clicked = () => {
+        //alert("whole window clicked.");
+        //alert(this.state.uploadFilePath);
+        //alert(this.state.downloadFileName);
+        if (this.state.uploading) {
+            //alert("returning.");
+            return;
+        }
+        setTimeout(() => {
+            if ( (document.getElementsByClassName("folder selected")[0] == null &&
+                document.getElementsByClassName("file selected")[0] == null) ) {
+                //alert("clear path and name in whole window.");
+                    this.setState({
+                        uploadFilePath: "",
+                        downloadFileName: ""
+                    });
+            }
+            //alert("finished whole window method.");
+        }, 100);
+    }
+
     componentDidUpdate() {
         if (document.getElementsByClassName("rendered-react-keyed-file-browser")[0] != null)
             document.getElementsByClassName("rendered-react-keyed-file-browser")[0].addEventListener("click", this.handleClickWindow);
     }
     handleClickWindow = () => {
-        setTimeout(() => {
+        //this.clicked();
+        //alert("key file browser window clicked.");
+        //alert(this.state.uploadFilePath);
+        //alert(this.state.downloadFileName);
+        setTimeout(() => {  
             let element = document.getElementsByClassName("folder selected")[0];
+            let element2 = document.getElementsByClassName("file selected")[0];
             if (element != null) {
-                let lowest = element.children[0].children[0].children[0].children[0].children[0].innerText;
-
+                //let lowest = element.children[0].children[0].children[0].children[0].children[0].innerText;
                 let path = "";
                 let find = element;
                 let foundParent = false;
                 do {
                     if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
                         foundParent = true;
-                    }   
-
+                    }
                     const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
                     path = folderName + "/" + path;
                     find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
                 } while (find != null && find.className === "folder" && !foundParent)
-
-                console.log(path);
                 this.setState({
-                    uploadFilePath: path
+                    uploadFilePath: path,
+                    downloadFileName: ""
                 });
             }
+            else if (element2 != null) {
+                let path = "";
+                let find = element2;
+                while (find != null && (find.className === "folder" || find.className === "file selected")) {
+                    let name;
+                    if (find.className === "folder") {
+                        name = find.children[0].children[0].children[0].children[0].children[0].innerText;
+                    } else if (find.className === "file selected") {
+                        name = find.children[0].children[0].children[0].children[0].innerText;
+                    }
+                    path = name + "/" + path;
+                    if (find.children[0].children[0].style.paddingLeft === '0px') {
+                        break;
+                    }
+                    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
+                }
+                //do {
+                //    if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
+                //        foundParent = true;
+                //    }
+                //    const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
+                //    console.log(folderName);
+                //    path = folderName + "/" + path;
+                //    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
+                //} while (find != null && find.className === "folder" && !foundParent)
+                this.setState({
+                    //uploadFilePath: "",
+                    downloadFileName: path.substring(0,path.length - 1) 
+                });
+            }
+            //alert("finished key file browser method.");
         }, 100);
     }
-    
+
     //fetchPathFiles = (val) => {
     //    this.setState({
     //        loading: true
@@ -136,6 +201,7 @@ export class Home extends Component {
         // create object
         let formData = new FormData();
         formData.append("folderPath", key);
+        alert(key);
         // define async function
         let createFolder = async () => {
             const response = await fetch('api/GreenWellFiles/AddAFolder', {
@@ -268,89 +334,89 @@ export class Home extends Component {
         renameFile(rf);
     }
 
-    handleCreateFiles = (files, prefix) => {
-        //console.log(files);
-        if (files == "" & prefix == "") {
-            alert("ok");
-            files = [this.state.uploadFile];
-            prefix = this.state.uploadFilePath;
-            alert(prefix);
-        }
-        // get the file/files full path
-        // put file/files string path/s in array
-        var fi;
-        let res = files.map((f) => {
-            fi = f;
-            return f.name
-        });
-        let p = [];
-        let p2 = []
-        if (files.length > 1) {
-            res = res.toString().split(",");
-            var i;
-            for (i = 0; i < res.length; i++) {
-                res[i] = prefix + res[i];
-                p2.push(files[i]);
-            }
-            p = [...res];
-        }
-        else {
-            res = prefix + res;
-            p = [res];
-            p2 = [fi];
-        }
-        // create async function
-        let addFile = async (cf, f) => {
-            let formData = new FormData();
-            for (let i = 0; i < f.length; i++) {
-                formData.append("p", cf[i])
-                formData.append("f", f[i]);
-            }
+    //handleCreateFiles = (files, prefix) => {
+    //    //console.log(files);
+    //    if (files == "" & prefix == "") {
+    //        alert("ok");
+    //        files = [this.state.uploadFile];
+    //        prefix = this.state.uploadFilePath;
+    //        alert(prefix);
+    //    }
+    //    // get the file/files full path
+    //    // put file/files string path/s in array
+    //    var fi;
+    //    let res = files.map((f) => {
+    //        fi = f;
+    //        return f.name
+    //    });
+    //    let p = [];
+    //    let p2 = []
+    //    if (files.length > 1) {
+    //        res = res.toString().split(",");
+    //        var i;
+    //        for (i = 0; i < res.length; i++) {
+    //            res[i] = prefix + res[i];
+    //            p2.push(files[i]);
+    //        }
+    //        p = [...res];
+    //    }
+    //    else {
+    //        res = prefix + res;
+    //        p = [res];
+    //        p2 = [fi];
+    //    }
+    //    // create async function
+    //    let addFile = async (cf, f) => {
+    //        let formData = new FormData();
+    //        for (let i = 0; i < f.length; i++) {
+    //            formData.append("p", cf[i])
+    //            formData.append("f", f[i]);
+    //        }
 
-            const response = await fetch('api/GreenWellFiles/AddAFile', {
-                method: 'POST',
-                //headers: {
-                //    'Accept': 'application/json',
-                //    'Content-Type': 'application/json',
-                //},
-                body: formData
-            });
-            const json = await response.json();
-            if (json.status === "200") {
-                this.setState(state => {
-                    const newFiles = files.map((file) => {
-                        let newKey = prefix
-                        if (prefix !== '' && prefix.substring(prefix.length - 1, prefix.length) !== '/') {
-                            newKey += '/'
-                        }
-                        newKey += file.name
-                        return {
-                            key: newKey
-                        }
-                    })
+    //        const response = await fetch('api/GreenWellFiles/AddAFile', {
+    //            method: 'POST',
+    //            //headers: {
+    //            //    'Accept': 'application/json',
+    //            //    'Content-Type': 'application/json',
+    //            //},
+    //            body: formData
+    //        });
+    //        const json = await response.json();
+    //        if (json.status === "200") {
+    //            this.setState(state => {
+    //                const newFiles = files.map((file) => {
+    //                    let newKey = prefix
+    //                    if (prefix !== '' && prefix.substring(prefix.length - 1, prefix.length) !== '/') {
+    //                        newKey += '/'
+    //                    }
+    //                    newKey += file.name
+    //                    return {
+    //                        key: newKey
+    //                    }
+    //                })
 
-                    const uniqueNewFiles = []
-                    newFiles.map((newFile) => {
-                        let exists = false
-                        state.files.map((existingFile) => {
-                            if (existingFile.key === newFile.key) {
-                                exists = true
-                            }
-                        })
-                        if (!exists) {
-                            uniqueNewFiles.push(newFile)
-                        }
-                    })
-                    state.files = state.files.concat(uniqueNewFiles)
-                    return state
-                })
-                alert(json.message);
-            }
-            else alert(json.message);
-        }
-        // call it
-        addFile(p, p2);
-    }
+    //                const uniqueNewFiles = []
+    //                newFiles.map((newFile) => {
+    //                    let exists = false
+    //                    state.files.map((existingFile) => {
+    //                        if (existingFile.key === newFile.key) {
+    //                            exists = true
+    //                        }
+    //                    })
+    //                    if (!exists) {
+    //                        uniqueNewFiles.push(newFile)
+    //                    }
+    //                })
+    //                state.files = state.files.concat(uniqueNewFiles)
+    //                return state
+    //            })
+    //            alert(json.message);
+    //        }
+    //        else alert(json.message);
+    //    }
+    //    // call it
+    //    addFile(p, p2);
+    //}
 
     handleDeleteFile = (fileKey) => {
         // store path for file to be deleted
@@ -391,12 +457,14 @@ export class Home extends Component {
             uploadFile: null,
             uploadFileName: "",
             uploadFilePath: "",
+            uploading: false
         });
     }
 
     handleModalShow = () => {
         this.setState({
-            showModal: true
+            showModal: true,
+            uploading: true
         });
     }
     openBrowseDialog = (dialog) => {
@@ -410,11 +478,7 @@ export class Home extends Component {
             uploadFile: files[0],
             uploadFileName: files[0].name
         });
-        
-    }
 
-    handleKeyPress = () => {
-        this.Search(document.getElementById("search").value)
     }
 
     handleAddFileFromUpload = () => {
@@ -466,10 +530,31 @@ export class Home extends Component {
                     uploadFile: null,
                     uploadFileName: "",
                     uploadFilePath: "",
+                    uploading: false
                 });
             }
         }
         addFile();
+    }
+
+    handleFileDownload = () => {
+        // assign to variable
+        //alert(this.state.downloadFileName);
+        let filePath = this.state.downloadFileName;
+        let fileName = filePath.split("/")[filePath.split("/").length - 1];
+        let downloadFile = async () => {
+            let formData = new FormData();
+            formData.append("filePath", filePath)
+
+            const response = await fetch('api/GreenWellFiles/DownloadAFile', {
+                method: 'POST',
+                body: formData
+            });
+
+            const blob = await response.blob();
+            saveAs(blob, fileName);
+        }
+        downloadFile();
     }
 
     setFiles = (fs) => {
@@ -520,7 +605,7 @@ export class Home extends Component {
                     options={tagsForFilter}
                     selectHintOnEnter={true}
                     ref={(ref) => this._typeahead = ref}
-                 />
+                />
             );
         }
         let browseOrUpload;
@@ -548,6 +633,18 @@ export class Home extends Component {
                     </div>
                 );
         }
+        let download = (
+            <div style={{ textAlign: "right" }}>
+                <Button onClick={this.handleFileDownload}>Download</Button>
+            </div>
+        );
+        if (this.state.downloadFileName.trim() === "") {
+            download = (
+                <div style={{ textAlign: "right" }}>
+                    <Button style={{cursor: "default", backgroundColor: "gray"}}>Download</Button>
+                </div>
+                );
+        }
         //    if (noFiles && !loading) {
         //        content =
         //            (
@@ -562,15 +659,15 @@ export class Home extends Component {
         //                    </InputGroup>
         //                </Container>
         //            );
-                    
+
         //}
 
-            if (!loading) {
-                content =
-                    (
-                      <React.Fragment>
+        if (!loading) {
+            content =
+                (
+                    <React.Fragment>
                         <div id="file_browser" className="div-files">
-                            <FileBrowser /*className="react-keyed-file-browser"*/ 
+                            <FileBrowser /*className="react-keyed-file-browser"*/
                                 files={this.state.files}
                                 icons={{
                                     File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
@@ -585,14 +682,17 @@ export class Home extends Component {
                                 onCreateFolder={this.handleCreateFolder}
                                 onDeleteFolder={this.handleDeleteFolder}
                                 onRenameFolder={this.handleRenameFolder}
+
                                 onRenameFile={this.handleRenameFile}
                                 onDeleteFile={this.handleDeleteFile}
-                                onCreateFiles={this.handleCreateFiles}
+
+                               // onCreateFiles={this.handleCreateFiles}
 
                             //onMoveFolder={this.handleRenameFolder}
                             //onMoveFile={this.handleRenameFolder}
                             />
-                        </div>
+                    </div>
+                    {download}
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
@@ -604,16 +704,16 @@ export class Home extends Component {
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
-                        <Footer handleModalShow={this.handleModalShow}/>
-                      </React.Fragment>
-                    );
+                        <Footer handleModalShow={this.handleModalShow} />
+                    </React.Fragment>
+                );
         }
         return (
-                <div>
+            <div>
                 <GreenWellNavMenu setParentForFiles={this.setFiles} />
-                    {content}
-                </div>
-            );
+                {content}
+            </div>
+        );
     }
 }
 
@@ -668,19 +768,12 @@ class GreenWellNavMenu extends Component {
                             <Dropdown.Item eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    <InputGroup>
-                        <Form inline>
-                            <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white", width: "200px" }} type="text" placeholder="Search"
-                                onKeyPress={event => {
-                                    if (event.key === "Enter") {
-                                        event.preventDefault();
-                                    }
-                            }}/>
-                            <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
-                                <Image src={searchButton} />
-                            </Button>
-                        </Form>
-                    </InputGroup>
+                    <Form inline>
+                        <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white" }} type="text" placeholder="Search" />
+                        <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
+                            <Image src={searchButton} />
+                        </Button>
+                    </Form>
                 </Nav>
             </Navbar>
         );
@@ -704,7 +797,7 @@ class Footer extends Component {
     render() {
         return (
             <div className="upload-footer">
-                <UploadButton handleModalShow={this.props.handleModalShow}/>
+                <UploadButton handleModalShow={this.props.handleModalShow} />
             </div>
         );
     }
