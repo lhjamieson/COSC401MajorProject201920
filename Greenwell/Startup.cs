@@ -2,6 +2,7 @@
 using Greenwell.Data;
 using Greenwell.Data.Models;
 using Greenwell.Models;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -58,6 +59,7 @@ namespace Greenwell
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
+                .AddRoleManager<RoleManager<IdentityRole>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentityServer()
@@ -66,9 +68,11 @@ namespace Greenwell
             services.AddAuthentication()
                 .AddIdentityServerJwt();
 
-            
+            //Here we add the profile service so our react profile includes a role..
+            services.AddTransient<IProfileService, ProfileService>();
+
             // In production, the React files will be served from this directory
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
