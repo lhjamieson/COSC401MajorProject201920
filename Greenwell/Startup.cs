@@ -128,6 +128,7 @@ namespace Greenwell
 
             foreach (string roleName in roleNames)
             {
+                //We create the role for every for every one in the Array
                 CreateRole(serviceProvider, roleName);
             }
 
@@ -143,6 +144,7 @@ namespace Greenwell
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+            //We check for the existence of the intended role.
             Task<bool> roleExists = roleManager.RoleExistsAsync(roleName);
             roleExists.Wait();
 
@@ -161,33 +163,46 @@ namespace Greenwell
         private static void AddUserToRole(IServiceProvider serviceProvider, string userEmail,
             string userPwd, string roleName)
         {
+            //TEMP
             Console.WriteLine(userEmail + userPwd + roleName);
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
+            
+            //We search to see if the intended user already exists
             Task<ApplicationUser> checkAppUser = userManager.FindByEmailAsync(userEmail);
             checkAppUser.Wait();
-
             ApplicationUser appUser = checkAppUser.Result;
 
+            //If they don't exist we go about creating a new user
             if (appUser == null)
             {
+                //We create a user with their properties
                 ApplicationUser newAppUser = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = userEmail
+                    UserName = userEmail,
+                    //Because we are only calling this on a demo user, we need just pretened the email has been confirmed, in the future,
+                    EmailConfirmed = true
                 };
 
+                //We create the new user. 
                 Task<IdentityResult> taskCreateAppUser = userManager.CreateAsync(newAppUser, userPwd);
                 taskCreateAppUser.Wait();
 
                 if (taskCreateAppUser.Result.Succeeded)
                 {
-                    //Because they are a demo user, we need to pretened the email has been confirmed.
-                    appUser.EmailConfirmed = true;
                     appUser = newAppUser;
                 }
             }
 
+            //This crappy code fixes a problem I introduced earlier, it's only needed if people's admin accounts were created before the fix.
+            //It will not be in the final code.
+            if (appUser.Email == "admin@test.com") {
+                appUser.EmailConfirmed = true;
+                userManager.UpdateAsync(appUser).Wait();
+                
+            }
+
+            //Finally we add the user to the role, regardless if they existed before or not.
             Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, roleName);
             newUserRole.Wait();
         }
