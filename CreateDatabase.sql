@@ -53,6 +53,7 @@ CREATE TABLE `files` (
   `uploadDate` date DEFAULT NULL,
   `extType` varchar(5) DEFAULT NULL,
   `fileSize` double DEFAULT NULL,
+  `adminOnly` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`fileID`),
   KEY `author` (`author`),
   CONSTRAINT `files_ibfk_2` FOREIGN KEY (`author`) REFERENCES `users` (`userID`)
