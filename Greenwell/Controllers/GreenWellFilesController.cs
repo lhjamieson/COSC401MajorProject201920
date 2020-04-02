@@ -23,10 +23,15 @@ namespace Greenwell.Controllers
         }
 
         //Return all files from the Database and add to a list.
-        [HttpGet("[action]")]
-        public ActionResult GetAllFiles()
+        [HttpPost("GetAllFiles")]
+        public ActionResult GetAllFiles([FromBody] string userIsAdmin)
         {
-            return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+            if (userIsAdmin == "Administrator")
+            {
+                return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+            }
+            return Ok(new { files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+
         }
 
         //Create directory for file storage on host device
@@ -82,7 +87,7 @@ namespace Greenwell.Controllers
 
         //Functionality to add a file from the User.
         [HttpPost("AddFileFromUpload")]
-        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags)
+        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags, bool adminAccessOnly)
         {
             try
             {
@@ -105,13 +110,19 @@ namespace Greenwell.Controllers
                         ids.Add(ts.TagId);
                     }
                 }
-
                 Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
                 {
                     FullPath = path,
                     Filename = System.IO.Path.GetFileName(path)
                 };
 
+                if (adminAccessOnly)
+                {
+                    file = new Greenwell.Data.Models.Files
+                    {
+                        AdminOnly = true
+                    };
+                }
                 await _context.Files.AddAsync(file);
                 await _context.SaveChangesAsync();
 

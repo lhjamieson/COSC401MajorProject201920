@@ -67,6 +67,10 @@ namespace Greenwell.Data.Models
                     .HasColumnName("uploadDate")
                     .HasColumnType("date");
 
+                entity.Property(e => e.AdminOnly)
+                    .HasColumnName("adminOnly")
+                    .HasColumnType("boolean");
+
                 entity.HasOne(d => d.AuthorNavigation)
                     .WithMany(p => p.Files)
                     .HasForeignKey(d => d.Author)

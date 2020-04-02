@@ -12,6 +12,8 @@ import uploadButton from '../logos/upload.png';
 import searchButton from '../logos/search.png';
 import { saveAs } from 'file-saver';
 
+import authService from './api-authorization/AuthorizeService';
+
 export class Home extends Component {
     displayName = Home.name
 
@@ -31,46 +33,78 @@ export class Home extends Component {
             tagsForFilter: [],
 
             downloadFileName: "",
-            uploading: false
+            uploading: false,
+
+            isAuthenticated: false,
+            userName: null,
+            role: null
 
         };
 
         fetch('api/GreenWellFiles/CreateLocalStorage');
+    }
 
-        fetch('api/GreenWellFiles/GetAllFiles')
-            .then(response => response.json())
-            .then(data => {
-                if (data.files.length == 0) {
-                    this.setState({
-                        loading: false,
-                        //noFiles: true,
-                        //filesLoaded: false,
-                        files: [],
-                        tagsForFilter: []
-                    });
-                }
-                else {
-                    var i;
-                    var t = [];
-                    for (i = 0; i < data.files.length; i++) {
-                        var r1 = {
-                            key: data.files[i]
-                        };
-                        t.push(r1);
-                    }
-                    this.setState({
-                        loading: false,
-                        //filesLoaded: true,
-                        //noFiles: false,
-                        files: t,
-                        tagsForFilter: data.tags
-                    });
-                }
-            });
+    componentWillMount() {
+        // get the user's role
+        this.populateState();
     }
 
     componentDidMount() {
         document.addEventListener("click", this.clicked);
+
+        let getFiles = async () => {
+            const response = await fetch('api/GreenWellFiles/GetAllFiles', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userIsAdmin: this.state.role })
+            });
+            const json = await response.json();
+            if (json.files.length == 0) {
+                this.setState({
+                    loading: false,
+                    //noFiles: true,
+                    //filesLoaded: false,
+                    files: [],
+                    tagsForFilter: []
+                });
+            }
+            else {
+                var i;
+                var t = [];
+                for (i = 0; i < json.files.length; i++) {
+                    var r1 = {
+                        key: json.files[i]
+                    };
+                    t.push(r1);
+                }
+                this.setState({
+                    loading: false,
+                    //filesLoaded: true,
+                    //noFiles: false,
+                    files: t,
+                    tagsForFilter: json.tags
+                });
+            }
+        }
+        getFiles();
+    }
+
+    async populateState() {
+        const [isAuthenticated, user] = await Promise.all([authService.isAuthenticated(), authService.getUser()]);
+        this.setState({
+            isAuthenticated,
+            userName: user && user.name,
+            role: user && user.role
+        });
+
+        //if (this.state.role != null) {
+        //    if (this.state.role == "Administrator") {
+        //        alert(this.state.role);
+        //    }
+        //}
     }
 
 
@@ -498,6 +532,8 @@ export class Home extends Component {
             formData.append("path", fullPath)
             formData.append("f", this.state.uploadFile);
             formData.append("tags", tags);
+            formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
+
 
             const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
@@ -613,7 +649,7 @@ export class Home extends Component {
             browseOrUpload = (
                 <Button variant="secondary" onClick={() => this.openBrowseDialog(document.getElementById("dialog"))}>
                     Browse
-            </Button>
+                </Button>
             );
         }
         if (uploadFileName !== "") {
@@ -622,6 +658,19 @@ export class Home extends Component {
                     Upload
                 </Button>
             );
+        }
+        let adminFileCheck = null;
+        if (this.state.role != null) {
+            if (this.state.role == "Administrator") {
+                if (uploadFileName !== "") {
+                    adminFileCheck = (
+                        <React.Fragment>
+                            <Form.Check id="adminCheckBox" type="checkbox" label="Show file to Admin Users only." />
+                            <br />
+                        </React.Fragment>
+                    );
+                }
+            }
         }
         let content;
         if (loading) {
@@ -700,7 +749,8 @@ export class Home extends Component {
                                 <Button variant="secondary" onClick={this.handleModalClose}>
                                     Close
                                  </Button>
-                                {browseOrUpload}
+                            {adminFileCheck}
+                            {browseOrUpload}
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
