@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj": {}
+    "C:\\Users\\isaac\\Documents\\School\\Programing\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj": {}
   },
   "projects": {
-    "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj": {
+    "C:\\Users\\isaac\\Documents\\School\\Programing\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
+        "projectUniqueName": "C:\\Users\\isaac\\Documents\\School\\Programing\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
         "projectName": "Greenwell.Data",
-        "projectPath": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
+        "projectPath": "C:\\Users\\isaac\\Documents\\School\\Programing\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
         "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\obj\\",
+        "outputPath": "C:\\Users\\isaac\\Documents\\School\\Programing\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\isaac\\AppData\\Roaming\\NuGet\\NuGet.Config",
