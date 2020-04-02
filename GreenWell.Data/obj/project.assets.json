@@ -6438,19 +6438,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\th3wa\\.nuget\\packages\\": {}
+    "C:\\Users\\isaac\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\th3wa\\Documents\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
+      "projectUniqueName": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
       "projectName": "Greenwell.Data",
-      "projectPath": "C:\\Users\\th3wa\\Documents\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
-      "packagesPath": "C:\\Users\\th3wa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\th3wa\\Documents\\GitHub\\COSC401MajorProject201920\\Greenwell.Data\\obj\\",
+      "projectPath": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\Greenwell.Data.csproj",
+      "packagesPath": "C:\\Users\\isaac\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\isaac\\Desktop\\COSC401MajorProject201920\\Greenwell.Data\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\th3wa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\isaac\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
