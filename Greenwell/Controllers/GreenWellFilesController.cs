@@ -120,6 +120,8 @@ namespace Greenwell.Controllers
                 {
                     file = new Greenwell.Data.Models.Files
                     {
+                        FullPath = path,
+                        Filename = System.IO.Path.GetFileName(path),
                         AdminOnly = true
                     };
                 }
@@ -167,78 +169,78 @@ namespace Greenwell.Controllers
             return Ok(new { message = "File was added successfully.", status = "200" });
         }
 
-        [HttpPost("AddAFile")]
-        public async Task<ActionResult> AddAFile([FromForm] string[] p, [FromForm] List<IFormFile> f)
-        {
-            if (p.Length > 1)
-            {
-                //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
-                //Here we check if a file already exists in the path. This is triggered only by having the same path as 
-                //another file. Much like other file systems, if the name isn't EXACTLY the same, it'll allow you to save it.
-                for (int i = 0; i < p.Length; i++)
-                {
-                    string path = p[i];
-                    string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
-                    string finalPath = localStorage + @"\" + path;
-                    if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
+        //[HttpPost("AddAFile")]
+        //public async Task<ActionResult> AddAFile([FromForm] string[] p, [FromForm] List<IFormFile> f)
+        //{
+        //    if (p.Length > 1)
+        //    {
+        //        //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
+        //        //Here we check if a file already exists in the path. This is triggered only by having the same path as 
+        //        //another file. Much like other file systems, if the name isn't EXACTLY the same, it'll allow you to save it.
+        //        for (int i = 0; i < p.Length; i++)
+        //        {
+        //            string path = p[i];
+        //            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
+        //            string finalPath = localStorage + @"\" + path;
+        //            if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
                     
-                    //Here we try to make a connection with the Database to begin to save there. If we don't get a connection, we get
-                    //a 500 error.
-                    try
-                    {
-                        Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
-                        {
-                            FullPath = p[i],
-                            Filename = System.IO.Path.GetFileName(p[i])
-                        };
-                        await _context.Files.AddAsync(file);
-                        await _context.SaveChangesAsync();
+        //            //Here we try to make a connection with the Database to begin to save there. If we don't get a connection, we get
+        //            //a 500 error.
+        //            try
+        //            {
+        //                Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
+        //                {
+        //                    FullPath = p[i],
+        //                    Filename = System.IO.Path.GetFileName(p[i])
+        //                };
+        //                await _context.Files.AddAsync(file);
+        //                await _context.SaveChangesAsync();
 
 
-                        using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
-                        {
-                            f[i].CopyTo(stream);
-                            stream.Dispose();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        return StatusCode(500, new { error = e.Message, status = "500" });
-                    }
-                }
-                return Ok(new { message = "Files were added successfully.", success = true, status = "200" });
-            }
-            else
-            {
-                string path = p[0];
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
-                string finalPath = localStorage + @"\" + path;
-                if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
+        //                using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
+        //                {
+        //                    f[i].CopyTo(stream);
+        //                    stream.Dispose();
+        //                }
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                return StatusCode(500, new { error = e.Message, status = "500" });
+        //            }
+        //        }
+        //        return Ok(new { message = "Files were added successfully.", success = true, status = "200" });
+        //    }
+        //    else
+        //    {
+        //        string path = p[0];
+        //        string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
+        //        string finalPath = localStorage + @"\" + path;
+        //        if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
 
-                try
-                {
-                    Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
-                    {
-                        FullPath = p[0],
-                        Filename = System.IO.Path.GetFileName(p[0])
-                };
-                    await _context.Files.AddAsync(file);
-                    await _context.SaveChangesAsync();
+        //        try
+        //        {
+        //            Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
+        //            {
+        //                FullPath = p[0],
+        //                Filename = System.IO.Path.GetFileName(p[0])
+        //        };
+        //            await _context.Files.AddAsync(file);
+        //            await _context.SaveChangesAsync();
 
-                    using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
-                    {
-                        f[0].CopyTo(stream);
-                        stream.Dispose();
-                    }
+        //            using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
+        //            {
+        //                f[0].CopyTo(stream);
+        //                stream.Dispose();
+        //            }
 
-                    return Ok(new { message = "File was added successfully.", success = true, status = "200" });
-                }
-                catch (Exception e)
-                {
-                    return StatusCode(500, new { error = e.Message, status = "500" });
-                }
-            }
-        }
+        //            return Ok(new { message = "File was added successfully.", success = true, status = "200" });
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            return StatusCode(500, new { error = e.Message, status = "500" });
+        //        }
+        //    }
+        //}
 
         //This function exists for the ability to add a folder.
         [HttpPost("AddAFolder")]

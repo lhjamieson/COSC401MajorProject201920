@@ -49,6 +49,11 @@ export class Home extends Component {
         this.populateState();
     }
 
+    componentDidUpdate() {
+        // get the user's role
+        this.populateState();
+    }
+
     componentDidMount() {
         document.addEventListener("click", this.clicked);
 
@@ -532,9 +537,10 @@ export class Home extends Component {
             formData.append("path", fullPath)
             formData.append("f", this.state.uploadFile);
             formData.append("tags", tags);
-            formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
-
-
+            if (document.getElementById("adminCheckBox") == null)
+                formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
+            else
+                formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
             const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
                 body: formData
