@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, FormControl, Container, Navbar, Nav, InputGroup, Modal, Row, Image, Form, Dropdown, ButtonGroup } from 'react-bootstrap';
+import { Button, FormControl, Container, Navbar, Nav, InputGroup, Modal, Row, Image, Form, Dropdown, ButtonGroup, Col } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import Moment from 'moment';
 import { Typeahead } from 'react-bootstrap-typeahead';
@@ -35,36 +35,34 @@ export class Home extends Component {
             downloadFileName: "",
             uploading: false,
 
-            isAuthenticated: false,
-            userName: null,
             role: null
 
         };
-
+        // check and create the local storage
         fetch('api/GreenWellFiles/CreateLocalStorage');
-    }
-
-    componentWillMount() {
-        // get the user's role
+        // check the state of the user and get the files
         this.populateState();
-    }
-
-    componentDidUpdate() {
-        // get the user's role
-        this.populateState();
+     
     }
 
     componentDidMount() {
-        document.addEventListener("click", this.clicked);
+        // add window event when component mounts
+        document.addEventListener("click", this.clicked);        
+    }
 
-        let getFiles = async () => {
+    componentWillUnmount() {
+        // remove window event when component will unmount
+        document.removeEventListener("click", this.clicked); 
+    }
+
+    // method that gets the state of the user and get the files accordingly
+    async populateState() {
+        let getFiles = async (r) => {
+            let formData = new FormData();
+            formData.append("userIsAdmin", r);
             const response = await fetch('api/GreenWellFiles/GetAllFiles', {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userIsAdmin: this.state.role })
+                body: formData
             });
             const json = await response.json();
             if (json.files.length == 0) {
@@ -94,16 +92,12 @@ export class Home extends Component {
                 });
             }
         }
-        getFiles();
-    }
 
-    async populateState() {
-        const [isAuthenticated, user] = await Promise.all([authService.isAuthenticated(), authService.getUser()]);
+        // get the state of the user and pass role of the user to previous method to get files
+        const [user] = await Promise.all([authService.getUser()]);
         this.setState({
-            isAuthenticated,
-            userName: user && user.name,
             role: user && user.role
-        });
+        }, () => getFiles(this.state.role));
 
         //if (this.state.role != null) {
         //    if (this.state.role == "Administrator") {
@@ -670,10 +664,10 @@ export class Home extends Component {
             if (this.state.role == "Administrator") {
                 if (uploadFileName !== "") {
                     adminFileCheck = (
-                        <React.Fragment>
+                        <div>
                             <Form.Check id="adminCheckBox" type="checkbox" label="Show file to Admin Users only." />
                             <br />
-                        </React.Fragment>
+                        </div>
                     );
                 }
             }
@@ -751,12 +745,25 @@ export class Home extends Component {
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
-                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
-                                <Button variant="secondary" onClick={this.handleModalClose}>
-                                    Close
-                                 </Button>
-                            {adminFileCheck}
-                            {browseOrUpload}
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+
+                            <Container>
+                                <Row>
+                                    <Col style={{ width: "100%", textAlign: "center" }}>
+                                        {adminFileCheck}
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col style={{width: "50%", textAlign: "center"}}>
+                                        <Button variant="secondary" onClick={this.handleModalClose}>
+                                            Close
+                                        </Button>
+                                    </Col>
+                                    <Col style={{ width: "50%", textAlign: "center" }}>
+                                        {browseOrUpload}
+                                    </Col>
+                                </Row>
+                            </Container>
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
@@ -779,13 +786,22 @@ class GreenWellNavMenu extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            searchBy: "tags"
+            role: null,
+            searchBy: "fileName"
         };
+        this.populateState();
+    }
+
+    async populateState() {
+        const [user] = await Promise.all([authService.getUser()])
+        this.setState({
+            role: user && user.role
+        });
     }
 
     Search = (val) => {
         let search = async (p) => {
-            let data = [p, this.state.searchBy];
+            let data = [p, this.state.searchBy, this.state.role];
             const response = await fetch('api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
@@ -820,8 +836,8 @@ class GreenWellNavMenu extends Component {
                     <Dropdown onSelect={(evt) => this.setSearchBy(evt)} as={ButtonGroup}>
                         <Dropdown.Toggle id="dropdown" />
                         <Dropdown.Menu>
-                            <Dropdown.Item eventKey="fileName" >Search By File Name</Dropdown.Item>
-                            <Dropdown.Item eventKey="tags"> By Tags</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName">Search By File Name</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Form inline>

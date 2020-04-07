@@ -24,12 +24,15 @@ namespace Greenwell.Controllers
 
         //Return all files from the Database and add to a list.
         [HttpPost("GetAllFiles")]
-        public ActionResult GetAllFiles([FromBody] string userIsAdmin)
+        public ActionResult GetAllFiles([FromForm] string userIsAdmin)
         {
+            // check if the user is admin or not
             if (userIsAdmin == "Administrator")
             {
+                // return files with admin only access
                 return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
             }
+            // return all files without admin only access
             return Ok(new { files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
 
         }
@@ -57,27 +60,60 @@ namespace Greenwell.Controllers
                 //if empty search bar, display all files
                 if (data[0].Trim() == "")
                 {
-                    return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                    // check if the user is admin or not
+                    if (data[2] == "Administrator")
+                    {
+                        // return files with admin only access
+                        return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                    }
+                    // return all files without admin only access
+                    return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
                 }
-                //list of all files that begin with the search query
-                var fs = _context.Files.Where(a => a.Filename.StartsWith(data[0].Trim())).Select(p => p.Filename).ToList();
+                //list of all files that begin with the search query, for main admin case
+                var fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower())).Select(p => p.Filename).ToList();
+                // check if user is not admin, and if so return only files without admin only
+                if (data[2] != "Administrator")
+                {
+                    fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower()) & a.AdminOnly != true).Select(p => p.Filename).ToList();
+                    // in case there is no files for the check with non admin
+                    if (fs.Count() == 0)
+                    {
+                        return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
+                    }
+                }
+                // check for case of admin
                 if (fs.Count() == 0)
                 {
                     return Ok(new { status = "no files matched", files = _context.Files.Select(p => p.FullPath).ToList() });
                 }
                 return Ok(new { status = "200", files = fs });
             }
+            // in case of empty search bar
             if (data[0].Trim() == "")
             {
-                return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                if (data[2] == "Administrator")
+                {
+                    // return all files for admin
+                    return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                }
+                // return files that are non admin only
+                return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
             }
             //Search by tag
-
             //list of files that have the queried tag
-            var res1 = _context.Tags.Include(a => a.Tagmap).Where(a => a.TagName == data[0]).Select(a => a.TagId).ToList();
+            var res1 = _context.Tags.Include(a => a.Tagmap).Where(a => a.TagName.ToLower() == data[0].Trim().ToLower()).Select(a => a.TagId).ToList();
             var res2 = _context.Tagmap.Include(a => a.File).Where(a => res1.Contains(a.TagId)).ToList();
+            // get all files, for admin case
             var files = res2.Select(a => a.File).Select(a => a.Filename).ToList();
-
+            // check if user is admin or not
+            if (data[2] != "Administrator")
+            {
+                files = res2.Select(a => a.File).Where(a => a.AdminOnly != true).Select(a => a.Filename).ToList();
+                if (files.Count() == 0)
+                {
+                    return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
+                }
+            }
             if (files.Count() == 0)
             {
                 return Ok(new { status = "no files matched", files = _context.Files.Select(p => p.FullPath).ToList() });
