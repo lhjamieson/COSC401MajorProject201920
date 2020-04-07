@@ -77,3 +77,9 @@ form-control-file {
 input.form-control-file {
     display: none;
 }
+
+.drop-down-item-style:hover {
+    background-color: none !important;
+}
+
+

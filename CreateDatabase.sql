@@ -30,15 +30,6 @@ CREATE TABLE `__efmigrationshistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `__efmigrationshistory`
---
-
-LOCK TABLES `__efmigrationshistory` WRITE;
-/*!40000 ALTER TABLE `__efmigrationshistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `__efmigrationshistory` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `files`
 --
 
@@ -53,20 +44,12 @@ CREATE TABLE `files` (
   `uploadDate` date DEFAULT NULL,
   `extType` varchar(5) DEFAULT NULL,
   `fileSize` double DEFAULT NULL,
+  `adminOnly` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`fileID`),
   KEY `author` (`author`),
   CONSTRAINT `files_ibfk_2` FOREIGN KEY (`author`) REFERENCES `users` (`userID`)
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `files`
---
-
-LOCK TABLES `files` WRITE;
-/*!40000 ALTER TABLE `files` DISABLE KEYS */;
-/*!40000 ALTER TABLE `files` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tagmap`
@@ -88,15 +71,6 @@ CREATE TABLE `tagmap` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `tagmap`
---
-
-LOCK TABLES `tagmap` WRITE;
-/*!40000 ALTER TABLE `tagmap` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tagmap` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `tags`
 --
 
@@ -109,15 +83,6 @@ CREATE TABLE `tags` (
   PRIMARY KEY (`tagID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tags`
---
-
-LOCK TABLES `tags` WRITE;
-/*!40000 ALTER TABLE `tags` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tags` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -136,13 +101,8 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `users`
+-- Dumping routines for database 'greenwelldatabase'
 --
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -153,4 +113,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-04  8:44:05
+-- Dump completed on 2020-04-07 10:18:44

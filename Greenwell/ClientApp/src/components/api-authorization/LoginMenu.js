@@ -10,7 +10,8 @@ export class LoginMenu extends Component {
 
         this.state = {
             isAuthenticated: false,
-            userName: null
+            userName: null,
+            role: null
         };
     }
 
@@ -27,12 +28,13 @@ export class LoginMenu extends Component {
         const [isAuthenticated, user] = await Promise.all([authService.isAuthenticated(), authService.getUser()])
         this.setState({
             isAuthenticated,
-            userName: user && user.name
+            userName: user && user.name,
+            role: user && user.role
         });
     }
 
     render() {
-        const { isAuthenticated, userName } = this.state;
+        const { isAuthenticated, userName, role } = this.state;
         if (!isAuthenticated) {
             const registerPath = `${ApplicationPaths.Register}`;
             const loginPath = `${ApplicationPaths.Login}`;
@@ -45,9 +47,31 @@ export class LoginMenu extends Component {
     }
 
     authenticatedView(userName, profilePath, logoutPath) {
+            if (this.state.role != null) {
+                if (this.state.role == "Administrator") {
+                    return (<Fragment>
+                        <NavItem>
+                            <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Admin</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
+                        </NavItem>
+                    </Fragment>);
+                }
+                else {
+                    return (<Fragment>
+                        <NavItem>
+                            <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Employee</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
+                        </NavItem>
+                    </Fragment>);
+                }
+        }
         return (<Fragment>
             <NavItem>
-                <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName}</NavLink>
+                <NavLink tag={Link} className="text-dark" to={profilePath}>Hello idiot}</NavLink>
             </NavItem>
             <NavItem>
                 <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>

@@ -23,10 +23,18 @@ namespace Greenwell.Controllers
         }
 
         //Return all files from the Database and add to a list.
-        [HttpGet("[action]")]
-        public ActionResult GetAllFiles()
+        [HttpPost("GetAllFiles")]
+        public ActionResult GetAllFiles([FromForm] string userIsAdmin)
         {
-            return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+            // check if the user is admin or not
+            if (userIsAdmin == "Administrator")
+            {
+                // return files with admin only access
+                return Ok(new { files = _context.Files.Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+            }
+            // return all files without admin only access
+            return Ok(new { files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList(), tags = _context.Tags.Select(t => t.TagName).ToList() });
+
         }
 
         //Create directory for file storage on host device
@@ -52,27 +60,60 @@ namespace Greenwell.Controllers
                 //if empty search bar, display all files
                 if (data[0].Trim() == "")
                 {
-                    return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                    // check if the user is admin or not
+                    if (data[2] == "Administrator")
+                    {
+                        // return files with admin only access
+                        return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                    }
+                    // return all files without admin only access
+                    return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
                 }
-                //list of all files that begin with the search query
-                var fs = _context.Files.Where(a => a.Filename.StartsWith(data[0].Trim())).Select(p => p.Filename).ToList();
+                //list of all files that begin with the search query, for main admin case
+                var fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower())).Select(p => p.Filename).ToList();
+                // check if user is not admin, and if so return only files without admin only
+                if (data[2] != "Administrator")
+                {
+                    fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower()) & a.AdminOnly != true).Select(p => p.Filename).ToList();
+                    // in case there is no files for the check with non admin
+                    if (fs.Count() == 0)
+                    {
+                        return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
+                    }
+                }
+                // check for case of admin
                 if (fs.Count() == 0)
                 {
                     return Ok(new { status = "no files matched", files = _context.Files.Select(p => p.FullPath).ToList() });
                 }
                 return Ok(new { status = "200", files = fs });
             }
+            // in case of empty search bar
             if (data[0].Trim() == "")
             {
-                return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                if (data[2] == "Administrator")
+                {
+                    // return all files for admin
+                    return Ok(new { status = "empty search bar", files = _context.Files.Select(p => p.FullPath).ToList() });
+                }
+                // return files that are non admin only
+                return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
             }
             //Search by tag
-
             //list of files that have the queried tag
-            var res1 = _context.Tags.Include(a => a.Tagmap).Where(a => a.TagName == data[0]).Select(a => a.TagId).ToList();
+            var res1 = _context.Tags.Include(a => a.Tagmap).Where(a => a.TagName.ToLower() == data[0].Trim().ToLower()).Select(a => a.TagId).ToList();
             var res2 = _context.Tagmap.Include(a => a.File).Where(a => res1.Contains(a.TagId)).ToList();
+            // get all files, for admin case
             var files = res2.Select(a => a.File).Select(a => a.Filename).ToList();
-
+            // check if user is admin or not
+            if (data[2] != "Administrator")
+            {
+                files = res2.Select(a => a.File).Where(a => a.AdminOnly != true).Select(a => a.Filename).ToList();
+                if (files.Count() == 0)
+                {
+                    return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
+                }
+            }
             if (files.Count() == 0)
             {
                 return Ok(new { status = "no files matched", files = _context.Files.Select(p => p.FullPath).ToList() });
@@ -82,7 +123,7 @@ namespace Greenwell.Controllers
 
         //Functionality to add a file from the User.
         [HttpPost("AddFileFromUpload")]
-        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags)
+        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags, bool adminAccessOnly)
         {
             try
             {
@@ -105,13 +146,21 @@ namespace Greenwell.Controllers
                         ids.Add(ts.TagId);
                     }
                 }
-
                 Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
                 {
                     FullPath = path,
                     Filename = System.IO.Path.GetFileName(path)
                 };
 
+                if (adminAccessOnly)
+                {
+                    file = new Greenwell.Data.Models.Files
+                    {
+                        FullPath = path,
+                        Filename = System.IO.Path.GetFileName(path),
+                        AdminOnly = true
+                    };
+                }
                 await _context.Files.AddAsync(file);
                 await _context.SaveChangesAsync();
 
@@ -156,78 +205,78 @@ namespace Greenwell.Controllers
             return Ok(new { message = "File was added successfully.", status = "200" });
         }
 
-        [HttpPost("AddAFile")]
-        public async Task<ActionResult> AddAFile([FromForm] string[] p, [FromForm] List<IFormFile> f)
-        {
-            if (p.Length > 1)
-            {
-                //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
-                //Here we check if a file already exists in the path. This is triggered only by having the same path as 
-                //another file. Much like other file systems, if the name isn't EXACTLY the same, it'll allow you to save it.
-                for (int i = 0; i < p.Length; i++)
-                {
-                    string path = p[i];
-                    string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
-                    string finalPath = localStorage + @"\" + path;
-                    if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
+        //[HttpPost("AddAFile")]
+        //public async Task<ActionResult> AddAFile([FromForm] string[] p, [FromForm] List<IFormFile> f)
+        //{
+        //    if (p.Length > 1)
+        //    {
+        //        //We get the path of local storage, change the path directories from / to \ if needed (epic windows style)
+        //        //Here we check if a file already exists in the path. This is triggered only by having the same path as 
+        //        //another file. Much like other file systems, if the name isn't EXACTLY the same, it'll allow you to save it.
+        //        for (int i = 0; i < p.Length; i++)
+        //        {
+        //            string path = p[i];
+        //            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
+        //            string finalPath = localStorage + @"\" + path;
+        //            if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
                     
-                    //Here we try to make a connection with the Database to begin to save there. If we don't get a connection, we get
-                    //a 500 error.
-                    try
-                    {
-                        Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
-                        {
-                            FullPath = p[i],
-                            Filename = System.IO.Path.GetFileName(p[i])
-                        };
-                        await _context.Files.AddAsync(file);
-                        await _context.SaveChangesAsync();
+        //            //Here we try to make a connection with the Database to begin to save there. If we don't get a connection, we get
+        //            //a 500 error.
+        //            try
+        //            {
+        //                Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
+        //                {
+        //                    FullPath = p[i],
+        //                    Filename = System.IO.Path.GetFileName(p[i])
+        //                };
+        //                await _context.Files.AddAsync(file);
+        //                await _context.SaveChangesAsync();
 
 
-                        using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
-                        {
-                            f[i].CopyTo(stream);
-                            stream.Dispose();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        return StatusCode(500, new { error = e.Message, status = "500" });
-                    }
-                }
-                return Ok(new { message = "Files were added successfully.", success = true, status = "200" });
-            }
-            else
-            {
-                string path = p[0];
-                string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
-                string finalPath = localStorage + @"\" + path;
-                if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
+        //                using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
+        //                {
+        //                    f[i].CopyTo(stream);
+        //                    stream.Dispose();
+        //                }
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                return StatusCode(500, new { error = e.Message, status = "500" });
+        //            }
+        //        }
+        //        return Ok(new { message = "Files were added successfully.", success = true, status = "200" });
+        //    }
+        //    else
+        //    {
+        //        string path = p[0];
+        //        string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
+        //        string finalPath = localStorage + @"\" + path;
+        //        if (System.IO.File.Exists(finalPath)) return StatusCode(500, new { message = "The file exists already.", status = "500" });
 
-                try
-                {
-                    Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
-                    {
-                        FullPath = p[0],
-                        Filename = System.IO.Path.GetFileName(p[0])
-                };
-                    await _context.Files.AddAsync(file);
-                    await _context.SaveChangesAsync();
+        //        try
+        //        {
+        //            Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
+        //            {
+        //                FullPath = p[0],
+        //                Filename = System.IO.Path.GetFileName(p[0])
+        //        };
+        //            await _context.Files.AddAsync(file);
+        //            await _context.SaveChangesAsync();
 
-                    using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
-                    {
-                        f[0].CopyTo(stream);
-                        stream.Dispose();
-                    }
+        //            using (System.IO.FileStream stream = System.IO.File.Create(finalPath))
+        //            {
+        //                f[0].CopyTo(stream);
+        //                stream.Dispose();
+        //            }
 
-                    return Ok(new { message = "File was added successfully.", success = true, status = "200" });
-                }
-                catch (Exception e)
-                {
-                    return StatusCode(500, new { error = e.Message, status = "500" });
-                }
-            }
-        }
+        //            return Ok(new { message = "File was added successfully.", success = true, status = "200" });
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            return StatusCode(500, new { error = e.Message, status = "500" });
+        //        }
+        //    }
+        //}
 
         //This function exists for the ability to add a folder.
         [HttpPost("AddAFolder")]

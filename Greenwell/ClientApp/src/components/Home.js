@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, FormControl, Container, Navbar, Nav, InputGroup, Modal, Row, Image, Form, Dropdown, ButtonGroup } from 'react-bootstrap';
+import { Button, FormControl, Container, Navbar, Nav, InputGroup, Modal, Row, Image, Form, Dropdown, ButtonGroup, Col } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import Moment from 'moment';
 import { Typeahead } from 'react-bootstrap-typeahead';
@@ -11,6 +11,8 @@ import '../Typeahead.css';
 import uploadButton from '../logos/upload.png';
 import searchButton from '../logos/search.png';
 import { saveAs } from 'file-saver';
+
+import authService from './api-authorization/AuthorizeService';
 
 export class Home extends Component {
     displayName = Home.name
@@ -31,46 +33,77 @@ export class Home extends Component {
             tagsForFilter: [],
 
             downloadFileName: "",
-            uploading: false
+            uploading: false,
+
+            role: null
 
         };
-
+        // check and create the local storage
         fetch('api/GreenWellFiles/CreateLocalStorage');
-
-        fetch('api/GreenWellFiles/GetAllFiles')
-            .then(response => response.json())
-            .then(data => {
-                if (data.files.length == 0) {
-                    this.setState({
-                        loading: false,
-                        //noFiles: true,
-                        //filesLoaded: false,
-                        files: [],
-                        tagsForFilter: []
-                    });
-                }
-                else {
-                    var i;
-                    var t = [];
-                    for (i = 0; i < data.files.length; i++) {
-                        var r1 = {
-                            key: data.files[i]
-                        };
-                        t.push(r1);
-                    }
-                    this.setState({
-                        loading: false,
-                        //filesLoaded: true,
-                        //noFiles: false,
-                        files: t,
-                        tagsForFilter: data.tags
-                    });
-                }
-            });
+        // check the state of the user and get the files
+        this.populateState();
+     
     }
 
     componentDidMount() {
-        document.addEventListener("click", this.clicked);
+        // add window event when component mounts
+        document.addEventListener("click", this.clicked);        
+    }
+
+    componentWillUnmount() {
+        // remove window event when component will unmount
+        document.removeEventListener("click", this.clicked); 
+    }
+
+    // method that gets the state of the user and get the files accordingly
+    async populateState() {
+        let getFiles = async (r) => {
+            let formData = new FormData();
+            formData.append("userIsAdmin", r);
+            const response = await fetch('api/GreenWellFiles/GetAllFiles', {
+                method: 'POST',
+                body: formData
+            });
+            const json = await response.json();
+            if (json.files.length == 0) {
+                this.setState({
+                    loading: false,
+                    //noFiles: true,
+                    //filesLoaded: false,
+                    files: [],
+                    tagsForFilter: []
+                });
+            }
+            else {
+                var i;
+                var t = [];
+                for (i = 0; i < json.files.length; i++) {
+                    var r1 = {
+                        key: json.files[i]
+                    };
+                    t.push(r1);
+                }
+                this.setState({
+                    loading: false,
+                    //filesLoaded: true,
+                    //noFiles: false,
+                    files: t,
+                    tagsForFilter: json.tags
+                });
+            }
+        }
+
+        // get the state of the user and pass role of the user to previous method to get files
+        const [user] = await Promise.all([authService.getUser()]);
+        this.setState({
+            role: user && user.role
+        }, () => getFiles(this.state.role));
+
+        //if (this.state.role != null) {
+        //    if (this.state.role == "Administrator") {
+        //        alert(this.state.role);
+        //    }
+        //}
     }
 
 
@@ -498,7 +531,10 @@ export class Home extends Component {
             formData.append("path", fullPath)
             formData.append("f", this.state.uploadFile);
             formData.append("tags", tags);
-
+            if (document.getElementById("adminCheckBox") == null)
+                formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
+            else
+                formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
             const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
                 body: formData
@@ -613,7 +649,7 @@ export class Home extends Component {
             browseOrUpload = (
                 <Button variant="secondary" onClick={() => this.openBrowseDialog(document.getElementById("dialog"))}>
                     Browse
-            </Button>
+                </Button>
             );
         }
         if (uploadFileName !== "") {
@@ -622,6 +658,19 @@ export class Home extends Component {
                     Upload
                 </Button>
             );
+        }
+        let adminFileCheck = null;
+        if (this.state.role != null) {
+            if (this.state.role == "Administrator") {
+                if (uploadFileName !== "") {
+                    adminFileCheck = (
+                        <div>
+                            <Form.Check id="adminCheckBox" type="checkbox" label="Show file to Admin Users only." />
+                            <br />
+                        </div>
+                    );
+                }
+            }
         }
         let content;
         if (loading) {
@@ -696,11 +745,25 @@ export class Home extends Component {
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
-                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
-                                <Button variant="secondary" onClick={this.handleModalClose}>
-                                    Close
-                                 </Button>
-                                {browseOrUpload}
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+
+                            <Container>
+                                <Row>
+                                    <Col style={{ width: "100%", textAlign: "center" }}>
+                                        {adminFileCheck}
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col style={{width: "50%", textAlign: "center"}}>
+                                        <Button variant="secondary" onClick={this.handleModalClose}>
+                                            Close
+                                        </Button>
+                                    </Col>
+                                    <Col style={{ width: "50%", textAlign: "center" }}>
+                                        {browseOrUpload}
+                                    </Col>
+                                </Row>
+                            </Container>
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
@@ -723,13 +786,22 @@ class GreenWellNavMenu extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            searchBy: "tags"
+            role: null,
+            searchBy: "fileName"
         };
+        this.populateState();
+    }
+
+    async populateState() {
+        const [user] = await Promise.all([authService.getUser()])
+        this.setState({
+            role: user && user.role
+        });
     }
 
     Search = (val) => {
         let search = async (p) => {
-            let data = [p, this.state.searchBy];
+            let data = [p, this.state.searchBy, this.state.role];
             const response = await fetch('api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
@@ -764,8 +836,8 @@ class GreenWellNavMenu extends Component {
                     <Dropdown onSelect={(evt) => this.setSearchBy(evt)} as={ButtonGroup}>
                         <Dropdown.Toggle id="dropdown" />
                         <Dropdown.Menu>
-                            <Dropdown.Item eventKey="fileName" >Search By File Name</Dropdown.Item>
-                            <Dropdown.Item eventKey="tags"> By Tags</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName">Search By File Name</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Form inline>
