@@ -79,7 +79,8 @@ export class Home extends Component {
                 var t = [];
                 for (i = 0; i < json.files.length; i++) {
                     var r1 = {
-                        key: json.files[i]
+                        key: json.files[i],
+                        size: 1
                     };
                     t.push(r1);
                 }
@@ -349,6 +350,7 @@ export class Home extends Component {
                                 newFiles.push({
                                     ...file,
                                     key: newKey,
+                                    size: 1,
                                     modified: +Moment(),
                                 })
                             } else {
@@ -544,7 +546,7 @@ export class Home extends Component {
                 this.setState(state => {
 
                     const addedNewFile = [];
-                    addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName });
+                    addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName, size: 1 });
 
                     const uniqueNewFiles = []
                     addedNewFile.map((newFile) => {
@@ -598,7 +600,8 @@ export class Home extends Component {
         var t = [];
         for (i = 0; i < fs.length; i++) {
             var r1 = {
-                key: fs[i]
+                key: fs[i],
+                size: 1
             };
             t.push(r1);
         }
@@ -836,8 +839,8 @@ class GreenWellNavMenu extends Component {
                     <Dropdown onSelect={(evt) => this.setSearchBy(evt)} as={ButtonGroup}>
                         <Dropdown.Toggle id="dropdown" />
                         <Dropdown.Menu>
-                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName">Search By File Name</Dropdown.Item>
-                            <Dropdown.Item className="drop-down-item-style" eventKey="tags"> By Tags</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName" active={this.state.searchBy === "fileName"}>Search By File Name</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="tags" active={this.state.searchBy === "tags"}> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Form inline>
