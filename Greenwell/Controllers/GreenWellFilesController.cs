@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Greenwell.Data;
 using Greenwell.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using Newtonsoft.Json.Linq;
 namespace Greenwell.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     public class GreenWellFilesController : Controller
     {
         private readonly greenwelldatabaseContext _context;
@@ -311,6 +313,7 @@ namespace Greenwell.Controllers
         }
 
         //Delete folder
+        [Authorize(Roles = "Administrator")]
         [HttpPost("DeleteAFolder")]
         public async Task<ActionResult> DeleteAFolder([FromForm] string folderPath)
         {
@@ -339,7 +342,9 @@ namespace Greenwell.Controllers
         }
 
         //Delete file
+
         [HttpPost("DeleteAFile")]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> DeleteAFile([FromBody] string p)
         {
             try

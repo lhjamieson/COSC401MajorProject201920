@@ -33,14 +33,6 @@ namespace Greenwell
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
-            
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -65,13 +57,25 @@ namespace Greenwell
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
                 .AddIdentityServerJwt();
 
             //Here we add the profile service so our react profile includes a role..
             services.AddTransient<IProfileService, ProfileService>();
 
-            // In production, the React files will be served from this directory
+            
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/build";
+            });
 
         }
 
@@ -96,6 +100,7 @@ namespace Greenwell
 
             app.UseRouting();
 
+            
             app.UseAuthentication();
             app.UseIdentityServer();
             app.UseAuthorization();

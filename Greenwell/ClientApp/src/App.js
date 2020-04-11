@@ -18,7 +18,7 @@ export default class App extends Component {
              * however for testing of the homepage it can be tedious to login every time so for now it will remain an UnauthorizedRoute
              * <AuthorizeRoute exact path='/' component={Home} />*/}
             
-            <Route exact path='/' component={Home} />
+            <AuthorizeRoute exact path='/' component={Home} />
 
         
         <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
