@@ -47,37 +47,31 @@ export class LoginMenu extends Component {
     }
 
     authenticatedView(userName, profilePath, logoutPath) {
-            if (this.state.role != null) {
-                if (this.state.role == "Administrator") {
-                    return (<Fragment>
-                        <NavItem>
-                            <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Admin</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
-                        </NavItem>
-                    </Fragment>);
-                }
-                else {
-                    return (<Fragment>
-                        <NavItem>
-                            <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Employee</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
-                        </NavItem>
-                    </Fragment>);
-                }
+        if (this.state.role != null) {
+            if (this.state.role == "Administrator") {
+                return (<Fragment>
+                    <NavItem>
+                        <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Admin</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink tag={Link} className="text-dark" to="Admin/Manage">Admin Only/Handle Users</NavLink>
+                    </NavItem>
+                </Fragment>);
+            }
+            else {
+                return (<Fragment>
+                    <NavItem>
+                        <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Employee</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
+                    </NavItem>
+                </Fragment>);
+            }
         }
-        return (<Fragment>
-            <NavItem>
-                <NavLink tag={Link} className="text-dark" to={profilePath}>Hello idiot}</NavLink>
-            </NavItem>
-            <NavItem>
-                <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
-            </NavItem>
-        </Fragment>);
-
     }
 
     anonymousView(registerPath, loginPath) {
