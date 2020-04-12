@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Greenwell.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     public class AdminOnlyController : Controller
     {

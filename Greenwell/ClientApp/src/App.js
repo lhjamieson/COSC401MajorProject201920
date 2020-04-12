@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { AdminOnly } from './components/AdminOnly';
 import AuthorizeRoute from './components/api-authorization/AuthorizeRoute';
+import AuthorizeAdminRoute from './components/api-authorization/AuthorizeAdminRoute';
 import ApiAuthorizationRoutes from './components/api-authorization/ApiAuthorizationRoutes';
 import { ApplicationPaths } from './components/api-authorization/ApiAuthorizationConstants';
 
@@ -20,7 +21,7 @@ export default class App extends Component {
              * <AuthorizeRoute exact path='/' component={Home} />*/}
             
             <AuthorizeRoute exact path='/' component={Home} />
-            <Route exact path='/Admin/Manage' component={AdminOnly} />
+            <AuthorizeAdminRoute exact path='/Admin/Manage' component={AdminOnly} />
         
         <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
       </Layout>
