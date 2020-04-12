@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import authService from './api-authorization/AuthorizeService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner, faTrash, faLevelUpAlt, faLevelDownAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faTrash, faLevelUpAlt, faLevelDownAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 export class AdminOnly extends Component {
     static displayName = AdminOnly.name;
@@ -18,6 +18,7 @@ export class AdminOnly extends Component {
             showDeleteUserModal: false,
             showMakeUserAdminModal: false,
             showMakeAdminNonAdminModal: false,
+            showAddUserModal: false,
             userInAction: null,
         }
 
@@ -102,6 +103,32 @@ export class AdminOnly extends Component {
         });
     };
 
+    validateEmail = (email) => {
+        if (/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(email))
+            return true;
+        return false;
+    }
+
+    addUser = async (userToAdd) => {
+        const [user] = await Promise.all([authService.getUser()]);
+        const token = await authService.getAccessToken();
+        let formData = new FormData();
+        formData.append("currentUser", user.name);
+        formData.append("userEmail", userToAdd);
+        const response = await fetch('api/AdminOnly/AddUser', {
+            method: 'POST',
+            body: formData,
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await response.json();
+        this.setState({
+            adminUsers: json.adminUsers,
+            nonAdminUsers: json.nonAdminUsers,
+            showMakeAdminNonAdminModal: false,
+            userInAction: null
+        }); 
+    };
+
     render() {
         let content = (
             <div style={{ paddingLeft: "40px", marginTop: "20px" }}>
@@ -146,6 +173,32 @@ export class AdminOnly extends Component {
                         <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
                             <Button onClick={() => this.setState({ showMakeAdminNonAdminModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => this.makeUserNonAdmin(this.state.userInAction)} variant="primary">Make Non-Admin</Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    <Modal show={this.state.showAddUserModal} onHide={() => this.setState({ showAddUserModal: false, userInAction: null })}>
+                        <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
+                            <Modal.Title>Confirm</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                            <p>Enter the email of the new user.</p>
+                            <label htmlFor="email">Email address: </label>
+                            <input type="email" id="email"></input>
+                            <br></br><b id="error" style={{ color: "red" }}></b>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Button onClick={() => this.setState({ showAddUserModal: false, userInAction: null })} variant="secondary">Cancel</Button>
+                            <Button onClick={() => {
+                                    if (this.validateEmail(document.getElementById('email').value)) {
+                                        document.getElementById('error').innerHTML = "";
+                                        this.addUser(document.getElementById('email').value);
+                                        this.setState({ showAddUserModal: false, userInAction: null })
+                                }
+                                else {
+                                        document.getElementById('error').innerHTML = "Invalid Email";
+                                }
+                            }
+                            } variant="primary">Add</Button>
                         </Modal.Footer>
                     </Modal>
                     <div style={{ display: "flex", justifyContent: "center" }}>
@@ -213,6 +266,11 @@ export class AdminOnly extends Component {
                             </tbody>
                         </Table>
                     </div>
+                    <React.Fragment>
+                        <Link onClick={() => this.setState({ showAddUserModal: true })}>
+                            <FontAwesomeIcon title="Add New User" style={{ color: "#73a353", marginLeft: "8%" }} className="fa-2x" icon={faUserPlus} />
+                        </Link>
+                    </React.Fragment>
                 </React.Fragment>
             );
         }
