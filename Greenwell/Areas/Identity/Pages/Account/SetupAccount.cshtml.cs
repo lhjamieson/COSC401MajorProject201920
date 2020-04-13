@@ -78,7 +78,7 @@ namespace Greenwell.Areas.Identity.Pages.Account
             var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
             if (result.Succeeded)
             {
-                return RedirectToPage("./ResetPasswordConfirmation");
+                return RedirectToPage("./Login");
             }
 
             foreach (var error in result.Errors)

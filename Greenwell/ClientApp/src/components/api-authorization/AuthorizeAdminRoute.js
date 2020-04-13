@@ -4,6 +4,7 @@ import { Route, Redirect } from 'react-router-dom'
 import { ApplicationPaths, QueryParameterNames } from './ApiAuthorizationConstants'
 import authService from './AuthorizeService'
 
+//Authorize admin route allows us to prevent employee user from accessing admin only resources.
 export default class AuthorizeAdminRoute extends Component {
     constructor(props) {
         super(props);
@@ -24,6 +25,8 @@ export default class AuthorizeAdminRoute extends Component {
         authService.unsubscribe(this._subscription);
     }
 
+    //We check if they are logged in and an admin, if so we send them to the intended resource with a route
+    //If not show them a you are unauthorized message.
     render() {
         const { ready, authenticated, admin } = this.state;
         if (!ready) {

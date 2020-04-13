@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 namespace Greenwell.Controllers
 {
     [Route("api/[controller]")]
+    //Forces all api calls to be authorized
     [Authorize]
     public class GreenWellFilesController : Controller
     {
@@ -312,7 +313,7 @@ namespace Greenwell.Controllers
             }
         }
 
-        //Delete folder
+        //Delete folder, authorized only to administrators
         [Authorize(Roles = "Administrator")]
         [HttpPost("DeleteAFolder")]
         public async Task<ActionResult> DeleteAFolder([FromForm] string folderPath)
@@ -342,7 +343,7 @@ namespace Greenwell.Controllers
         }
 
         //Delete file
-
+        //Authorized only to administrators
         [HttpPost("DeleteAFile")]
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> DeleteAFile([FromBody] string p)

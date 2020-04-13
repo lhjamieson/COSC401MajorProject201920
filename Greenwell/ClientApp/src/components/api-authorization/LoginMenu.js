@@ -36,9 +36,8 @@ export class LoginMenu extends Component {
     render() {
         const { isAuthenticated, userName, role } = this.state;
         if (!isAuthenticated) {
-            const registerPath = `${ApplicationPaths.Register}`;
             const loginPath = `${ApplicationPaths.Login}`;
-            return this.anonymousView(registerPath, loginPath);
+            return this.anonymousView(loginPath);
         } else {
             const profilePath = `${ApplicationPaths.Profile}`;
             const logoutPath = { pathname: `${ApplicationPaths.LogOut}`, state: { local: true } };
@@ -51,7 +50,7 @@ export class LoginMenu extends Component {
             if (this.state.role == "Administrator") {
                 return (<Fragment>
                     <NavItem>
-                        <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName} | Admin</NavLink>
+                        <NavLink tag={Link} className="text-dark" to={profilePath}>Hello {userName}</NavLink>
                     </NavItem>
                     <NavItem>
                         <NavLink tag={Link} className="text-dark" to={logoutPath}>Logout</NavLink>
@@ -74,11 +73,8 @@ export class LoginMenu extends Component {
         }
     }
 
-    anonymousView(registerPath, loginPath) {
+    anonymousView(loginPath) {
         return (<Fragment>
-            <NavItem>
-                <NavLink tag={Link} className="text-dark" to={registerPath}>Register</NavLink>
-            </NavItem>
             <NavItem>
                 <NavLink tag={Link} className="text-dark" to={loginPath}>Login</NavLink>
             </NavItem>

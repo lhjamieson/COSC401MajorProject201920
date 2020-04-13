@@ -112,6 +112,8 @@ namespace Greenwell.Controllers
             checkAppUser.Wait();
             ApplicationUser appUser = checkAppUser.Result;
 
+
+            //If they already exist we do nothing.
             if (appUser == null)
             {
                 //We create a user with their properties
@@ -131,6 +133,7 @@ namespace Greenwell.Controllers
                 taskCreateAppUser.Wait();
 
 
+                //We check if the user was successfully created.
                 if (taskCreateAppUser.Result.Succeeded)
                 {
                     appUser = newAppUser;
@@ -139,12 +142,13 @@ namespace Greenwell.Controllers
                  //Return user cannot be created error.
                 }
 
-                Debug.WriteLine("Users password" + userpass);
+                Debug.WriteLine("Users password: " + userpass);
+
                 //We add the user to the role, regardless if they existed before or not.
                 Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, "Member");
-            newUserRole.Wait();
+                newUserRole.Wait();
 
-                //Finally we send the user a prompt to setup their account which is just a modified password reset.
+                //Finally we send the user a email to setup their account which is just a modified password reset.
                 var code = await userManager.GeneratePasswordResetTokenAsync(appUser);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
@@ -156,11 +160,11 @@ namespace Greenwell.Controllers
                 await emailSender.SendEmailAsync(
                     userEmail,
                     "Setup Your Greenwell Account",
-                    $"You have been invited to create a Greenwell State Park Account. Please finish setting up account by creating a password <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>.");
+                    $"You have been invited to create a Greenwell State Park Account. Please finish setting up account by creating a password <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>. You must finish setting up your account within 14 days.");
                 Debug.WriteLine(callbackUrl);     
             }
 
-            // post making user admin
+            //Return a updated list of users.
             // get all admin users
             var admins = await userManager.GetUsersInRoleAsync("Administrator");
             // exclude current admin user
@@ -171,13 +175,12 @@ namespace Greenwell.Controllers
             return Ok(new { adminUsers, nonAdminUsers });
         }
 
-        //Function that generates the temporary password for the created user.
+        //Function that generates the temporary password for the created user. It derives all requirements from the userManager.
         private string GeneratePassword()
         {
+            //Retrieves user manager password requirements
             var options = userManager.Options.Password;
-
             int length = options.RequiredLength;
-
             bool nonAlphanumeric = options.RequireNonAlphanumeric;
             bool digit = options.RequireDigit;
             bool lowercase = options.RequireLowercase;
@@ -186,6 +189,7 @@ namespace Greenwell.Controllers
             StringBuilder password = new StringBuilder();
             Random random = new Random();
 
+            //Loop that first adds a random assortment of characters
             while (password.Length < length)
             {
                 char c = (char)random.Next(32, 126);
@@ -202,6 +206,7 @@ namespace Greenwell.Controllers
                     nonAlphanumeric = false;
             }
 
+            //If we missed a requirement for a password we tack it on the end
             if (nonAlphanumeric)
                 password.Append((char)random.Next(33, 48));
             if (digit)

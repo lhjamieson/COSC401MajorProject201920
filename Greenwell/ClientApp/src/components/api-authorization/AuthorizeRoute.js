@@ -4,6 +4,7 @@ import { Route, Redirect } from 'react-router-dom'
 import { ApplicationPaths, QueryParameterNames } from './ApiAuthorizationConstants'
 import authService from './AuthorizeService'
 
+//Authorize route allows us to check if a user is authenticated before allowing them to acsess a resource.
 export default class AuthorizeRoute extends Component {
     constructor(props) {
         super(props);
@@ -23,8 +24,10 @@ export default class AuthorizeRoute extends Component {
         authService.unsubscribe(this._subscription);
     }
 
+    //If they are authenticated we return a route to the indented resource, outherwise we redirect them
     render() {
         const { ready, authenticated } = this.state;
+        //Redirect to the login page as if you are not authenticated at all, you need to login.
         const redirectUrl = `${ApplicationPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURI(window.location.href)}`
         if (!ready) {
             return <div></div>;

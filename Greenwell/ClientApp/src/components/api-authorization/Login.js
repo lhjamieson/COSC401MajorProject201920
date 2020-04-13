@@ -34,9 +34,6 @@ export class Login extends Component {
             case LoginActions.Profile:
                 this.redirectToProfile();
                 break;
-            case LoginActions.Register:
-                this.redirectToRegister();
-                break;
             default:
                 throw new Error(`Invalid action '${action}'`);
         }
@@ -55,7 +52,6 @@ export class Login extends Component {
                 case LoginActions.LoginCallback:
                     return (<div></div>);
                 case LoginActions.Profile:
-                case LoginActions.Register:
                     return (<div></div>);
                 default:
                     throw new Error(`Invalid action '${action}'`);
@@ -89,7 +85,7 @@ export class Login extends Component {
                 // is when we are doing a redirect sign in flow.
                 throw new Error('Should not redirect.');
             case AuthenticationResultStatus.Success:
-                await this.navigateToReturnUrl(this.getReturnUrl(result.state));
+                await this.navigateToReturnUrl(ApplicationPaths.DefaultLoginRedirectPath);
                 break;
             case AuthenticationResultStatus.Fail:
                 this.setState({ message: result.message });
@@ -109,9 +105,7 @@ export class Login extends Component {
         return (state && state.returnUrl) || fromQuery || `${window.location.origin}/`;
     }
 
-    redirectToRegister() {
-        this.redirectToApiAuthorizationPath(`${ApplicationPaths.IdentityRegisterPath}?${QueryParameterNames.ReturnUrl}=${encodeURI(ApplicationPaths.Login)}`);
-    }
+
 
     redirectToProfile() {
         this.redirectToApiAuthorizationPath(ApplicationPaths.IdentityManagePath);

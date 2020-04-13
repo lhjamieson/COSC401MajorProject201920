@@ -156,7 +156,7 @@ export class AdminOnly extends Component {
                             <Modal.Title>Confirm</Modal.Title>
                         </Modal.Header>
                         <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
-                            <p>Are you sure you want to make this Non-Admin User an Admin User?</p>
+                            <p>Are you sure you want to make this user an Admin?</p>
                         </Modal.Body>
                         <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
                             <Button onClick={() => this.setState({ showMakeUserAdminModal: false, userInAction: null })} variant="secondary">Cancel</Button>
@@ -168,7 +168,7 @@ export class AdminOnly extends Component {
                             <Modal.Title>Confirm</Modal.Title>
                         </Modal.Header>
                         <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
-                            <p>Are you sure you want to make this Admin User Non-Admin User?</p>
+                            <p>Are you sure you want to remove this user's Admin status?</p>
                         </Modal.Body>
                         <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
                             <Button onClick={() => this.setState({ showMakeAdminNonAdminModal: false, userInAction: null })} variant="secondary">Cancel</Button>
@@ -178,11 +178,11 @@ export class AdminOnly extends Component {
 
                     <Modal show={this.state.showAddUserModal} onHide={() => this.setState({ showAddUserModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
-                            <Modal.Title>Confirm</Modal.Title>
+                            <Modal.Title>Add New User</Modal.Title>
                         </Modal.Header>
                         <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
-                            <p>Enter the email of the new user.</p>
-                            <label htmlFor="email">Email address: </label>
+                            <p>Enter the email of the intended new user, they will recieve an email instructing them how to finish setting up their account.</p>
+                            <label htmlFor="email">Email: </label>
                             <input type="email" id="email"></input>
                             <br></br><b id="error" style={{ color: "red" }}></b>
                         </Modal.Body>
@@ -230,7 +230,7 @@ export class AdminOnly extends Component {
                                                         <FontAwesomeIcon title="Delete User" style={{ color: "#73a353" }} className="fa-2x" icon={faTrash} />
                                                     </Link>
                                                     <Link onClick={() => this.setState({ showMakeAdminNonAdminModal: true, userInAction: adminUsers.userName })}>
-                                                        <FontAwesomeIcon title="Make User Non-Admin" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faLevelDownAlt} />
+                                                        <FontAwesomeIcon title="Remove Admin Role" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faLevelDownAlt} />
                                                     </Link>
                                                 </React.Fragment>
                                             }

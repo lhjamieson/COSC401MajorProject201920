@@ -67,8 +67,10 @@ namespace Greenwell
             })
                 .AddIdentityServerJwt();
 
-            //Here we add the profile service so our react profile includes a role..
+            //Here we add the profile service so our react profile includes a role.
             services.AddTransient<IProfileService, ProfileService>();
+            
+            //Configuration for email sending.
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<AuthMessageSenderOptions>(Configuration);
 
