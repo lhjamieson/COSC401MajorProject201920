@@ -56,16 +56,6 @@ export class Home extends Component {
         });
     }
 
-    componentDidMount() {
-        // add window event when component mounts
-        document.addEventListener("click", this.clicked);
-    }
-
-    componentWillUnmount() {
-        // remove window event when component will unmount
-        document.removeEventListener("click", this.clicked);
-    }
-
     // method that gets the state of the user and get the files accordingly
     async populateState() {
         let getFiles = async (r) => {
@@ -111,128 +101,22 @@ export class Home extends Component {
     }
 
 
-
-    clicked = () => {
-        //alert("whole window clicked.");
-        //alert(this.state.uploadFilePath);
-        //alert(this.state.downloadFileName);
-        if (this.state.uploading) {
-            //alert("returning.");
-            return;
-        }
-        setTimeout(() => {
-            if ((document.getElementsByClassName("folder selected")[0] == null &&
-                document.getElementsByClassName("file selected")[0] == null)) {
-                //alert("clear path and name in whole window.");
-                this.setState({
-                    uploadFilePath: "",
-                    downloadFileName: ""
-                });
-            }
-            //alert("finished whole window method.");
-        }, 100);
+    //Function that handles when a file is clicked on within react file browser
+    handleFileSelection = (selection) => {
+        this.setState({
+            uploadFilePath: "",
+            downloadFileName: selection.key
+        });
     }
 
-    componentDidUpdate() {
-        if (document.getElementsByClassName("rendered-react-keyed-file-browser")[0] != null)
-            document.getElementsByClassName("rendered-react-keyed-file-browser")[0].addEventListener("click", this.handleClickWindow);
-    }
-    handleClickWindow = () => {
-        //this.clicked();
-        //alert("key file browser window clicked.");
-        //alert(this.state.uploadFilePath);
-        //alert(this.state.downloadFileName);
-        setTimeout(() => {
-            let element = document.getElementsByClassName("folder selected")[0];
-            let element2 = document.getElementsByClassName("file selected")[0];
-            if (element != null) {
-                //let lowest = element.children[0].children[0].children[0].children[0].children[0].innerText;
-                let path = "";
-                let find = element;
-                let foundParent = false;
-                do {
-                    if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
-                        foundParent = true;
-                    }
-                    const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                    path = folderName + "/" + path;
-                    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                } while (find != null && find.className === "folder" && !foundParent)
-                this.setState({
-                    uploadFilePath: path,
-                    downloadFileName: ""
-                });
-            }
-            else if (element2 != null) {
-                let path = "";
-                let find = element2;
-                while (find != null && (find.className === "folder" || find.className === "file selected")) {
-                    let name;
-                    if (find.className === "folder") {
-                        name = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                    } else if (find.className === "file selected") {
-                        name = find.children[0].children[0].children[0].children[0].innerText;
-                    }
-                    path = name + "/" + path;
-                    if (find.children[0].children[0].style.paddingLeft === '0px') {
-                        break;
-                    }
-                    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                }
-                //do {
-                //    if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
-                //        foundParent = true;
-                //    }
-                //    const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                //    console.log(folderName);
-                //    path = folderName + "/" + path;
-                //    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                //} while (find != null && find.className === "folder" && !foundParent)
-                this.setState({
-                    //uploadFilePath: "",
-                    downloadFileName: path.substring(0, path.length - 1)
-                });
-            }
-            //alert("finished key file browser method.");
-        }, 100);
+    //Function that handles when a folder is clicked on with react file browser
+    handleFolderSelection = (selection) => {
+        this.setState({
+            uploadFilePath: selection.key,
+            downloadFileName: ""
+        });
     }
 
-    //fetchPathFiles = (val) => {
-    //    this.setState({
-    //        loading: true
-    //    });
-    //    const pf = val;
-    //    let getFiles = async (p) => {
-    //        const response = await fetch('api/GreenWellFiles/GetFilesFromGivenPath', {
-    //            method: 'POST',
-    //            headers: {
-    //                'Accept': 'application/json',
-    //                'Content-Type': 'application/json',
-    //            },
-    //            body: JSON.stringify(p.toString())
-    //        });
-    //        const json = await response.json();
-    //        if (json.status === "200") {
-    //            var i;
-    //            var t = [];
-    //            for (i = 0; i < json.files.length; i++) {
-    //                var r1 = {
-    //                    key: json.files[i]
-    //                };
-    //                t.push(r1);
-    //            }
-    //            this.setState({
-    //                loading: false,
-    //                filesLoaded: true,
-    //                noFiles: false,
-    //                files: t
-    //            });
-    //            alert(json.message);
-    //        }
-    //        else alert(json.message);
-    //    }
-    //    getFiles(pf);
-    //}
 
     handleCreateFolder = (key) => {
         // create object
@@ -558,19 +442,21 @@ export class Home extends Component {
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
             else
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
+
             const token = await authService.getAccessToken();
             const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminAddFileFromUpload' : 'api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
                 body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
+
             const json = await response.json();
             if (json.status === "200") {
                 //We don't add the file to the browser if the user isn't an admin becuase it needs to be approved.
                 if (this.state.role == "Administrator") {
                     this.setState(state => {
                         const addedNewFile = [];
-                        addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName });
+                        addedNewFile.push({ key: this.state.uploadFilePath + this.state.uploadFileName });
 
                         const uniqueNewFiles = []
                         addedNewFile.map((newFile) => {
@@ -729,7 +615,8 @@ export class Home extends Component {
                 onCreateFolder={this.handleCreateFolder}
                 onRenameFolder={this.handleRenameFolder}
                 onRenameFile={this.handleRenameFile}
-
+                onSelectFile={this.handleFileSelection}
+                onSelectFolder={this.handleFolderSelection}
 
             // onCreateFiles={this.handleCreateFiles}
 
@@ -756,7 +643,8 @@ export class Home extends Component {
                         onCreateFolder={this.handleCreateFolder}
                         onRenameFolder={this.handleRenameFolder}
                         onRenameFile={this.handleRenameFile}
-
+                        onSelectFile={this.handleFileSelection}
+                        onSelectFolder={this.handleFolderSelection}
 
                     // onCreateFiles={this.handleCreateFiles}
 
@@ -847,16 +735,16 @@ export class Home extends Component {
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
-                    <Footer handleModalShow={this.handleModalShow} />
+                        <Footer handleModalShow={this.handleModalShow} />
 
-                    <Modal centered show={this.state.showAlertModal} onEnter={() => { document.getElementById("alert").innerHTML = this.state.alertMessage }} onHide={() => this.setState({ showAlertModal: false, alertMesssage: null })}>
-                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
-                            <p id="alert"></p>
-                        </Modal.Body>
-                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
-                            <Button onClick={() => { this.setState({ showAlertModal: false, alertMesssage: null }) }} variant="primary">Ok</Button>
-                        </Modal.Footer>
-                    </Modal>
+                        <Modal centered show={this.state.showAlertModal} onEnter={() => { document.getElementById("alert").innerHTML = this.state.alertMessage }} onHide={() => this.setState({ showAlertModal: false, alertMesssage: null })}>
+                            <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                                <p id="alert"></p>
+                            </Modal.Body>
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                                <Button onClick={() => { this.setState({ showAlertModal: false, alertMesssage: null }) }} variant="primary">Ok</Button>
+                            </Modal.Footer>
+                        </Modal>
 
 
                     </React.Fragment>
