@@ -71,6 +71,10 @@ namespace Greenwell.Data.Models
                     .HasColumnName("adminOnly")
                     .HasColumnType("boolean");
 
+                entity.Property(e => e.Approved)
+                    .HasColumnName("approved")
+                    .HasColumnType("boolean");
+
                 entity.HasOne(d => d.AuthorNavigation)
                     .WithMany(p => p.Files)
                     .HasForeignKey(d => d.Author)

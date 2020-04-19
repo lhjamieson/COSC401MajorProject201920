@@ -40,11 +40,11 @@ export class Home extends Component {
         };
         // check and create the local storage
         this.createStorage();
-    
+
 
         // check the state of the user and get the files
         this.populateState();
-     
+
     }
 
     //Create storage on constructor
@@ -57,23 +57,20 @@ export class Home extends Component {
 
     componentDidMount() {
         // add window event when component mounts
-        document.addEventListener("click", this.clicked);        
+        document.addEventListener("click", this.clicked);
     }
 
     componentWillUnmount() {
         // remove window event when component will unmount
-        document.removeEventListener("click", this.clicked); 
+        document.removeEventListener("click", this.clicked);
     }
 
     // method that gets the state of the user and get the files accordingly
     async populateState() {
         let getFiles = async (r) => {
-            let formData = new FormData();
-            formData.append("userIsAdmin", r);
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/GetAllFiles', {
+            const response = await fetch(r ? 'api/GreenWellFiles/AdminGetAllFiles' : 'api/GreenWellFiles/GetAllFiles', {
                 method: 'POST',
-                body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
@@ -109,13 +106,7 @@ export class Home extends Component {
         const [user] = await Promise.all([authService.getUser()]);
         this.setState({
             role: user && user.role
-        }, () => getFiles(this.state.role));
-
-        //if (this.state.role != null) {
-        //    if (this.state.role == "Administrator") {
-        //        alert(this.state.role);
-        //    }
-        //}
+        }, () => getFiles(this.state.role == "Administrator"));
     }
 
 
@@ -129,13 +120,13 @@ export class Home extends Component {
             return;
         }
         setTimeout(() => {
-            if ( (document.getElementsByClassName("folder selected")[0] == null &&
-                document.getElementsByClassName("file selected")[0] == null) ) {
+            if ((document.getElementsByClassName("folder selected")[0] == null &&
+                document.getElementsByClassName("file selected")[0] == null)) {
                 //alert("clear path and name in whole window.");
-                    this.setState({
-                        uploadFilePath: "",
-                        downloadFileName: ""
-                    });
+                this.setState({
+                    uploadFilePath: "",
+                    downloadFileName: ""
+                });
             }
             //alert("finished whole window method.");
         }, 100);
@@ -150,7 +141,7 @@ export class Home extends Component {
         //alert("key file browser window clicked.");
         //alert(this.state.uploadFilePath);
         //alert(this.state.downloadFileName);
-        setTimeout(() => {  
+        setTimeout(() => {
             let element = document.getElementsByClassName("folder selected")[0];
             let element2 = document.getElementsByClassName("file selected")[0];
             if (element != null) {
@@ -198,7 +189,7 @@ export class Home extends Component {
                 //} while (find != null && find.className === "folder" && !foundParent)
                 this.setState({
                     //uploadFilePath: "",
-                    downloadFileName: path.substring(0,path.length - 1) 
+                    downloadFileName: path.substring(0, path.length - 1)
                 });
             }
             //alert("finished key file browser method.");
@@ -482,7 +473,7 @@ export class Home extends Component {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -558,33 +549,39 @@ export class Home extends Component {
             else
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
+            const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminAddFileFromUpload' : 'api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
                 body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.status === "200") {
-                this.setState(state => {
+                //We don't add the file to the browser if the user isn't an admin becuase it needs to be approved.
+                if (this.state.role == "Administrator") {
+                    this.setState(state => {
+                        const addedNewFile = [];
+                        addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName });
 
-                    const addedNewFile = [];
-                    addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName });
-
-                    const uniqueNewFiles = []
-                    addedNewFile.map((newFile) => {
-                        let exists = false
-                        state.files.map((existingFile) => {
-                            if (existingFile.key === newFile.key) {
-                                exists = true
+                        const uniqueNewFiles = []
+                        addedNewFile.map((newFile) => {
+                            let exists = false
+                            state.files.map((existingFile) => {
+                                if (existingFile.key === newFile.key) {
+                                    exists = true
+                                }
+                            })
+                            if (!exists) {
+                                uniqueNewFiles.push(newFile)
                             }
                         })
-                        if (!exists) {
-                            uniqueNewFiles.push(newFile)
-                        }
-                    })
-                    state.files = state.files.concat(uniqueNewFiles)
-                    return state
-                })
+                        state.files = state.files.concat(uniqueNewFiles)
+                        return state
+
+                    });
+                }
+                else {
+                    alert('File has been sent for approval')
+                }
                 this.setState({
                     showModal: false,
                     uploadFile: null,
@@ -687,27 +684,27 @@ export class Home extends Component {
         let adminFileCheck = null;
         let deletePermission = (
             <FileBrowser /*className="react-keyed-file-browser"*/
-            files={this.state.files}
-            icons={{
-                File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
-                Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
-                PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
-                Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
-                Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
-                FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
-                Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
-                Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
-            }}
-            onCreateFolder={this.handleCreateFolder}
-            onRenameFolder={this.handleRenameFolder}
-            onRenameFile={this.handleRenameFile}
+                files={this.state.files}
+                icons={{
+                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                }}
+                onCreateFolder={this.handleCreateFolder}
+                onRenameFolder={this.handleRenameFolder}
+                onRenameFile={this.handleRenameFile}
 
 
-        // onCreateFiles={this.handleCreateFiles}
+            // onCreateFiles={this.handleCreateFiles}
 
-        //onMoveFolder={this.handleRenameFolder}
-        //onMoveFile={this.handleRenameFolder}
-        />);
+            //onMoveFolder={this.handleRenameFolder}
+            //onMoveFile={this.handleRenameFolder}
+            />);
         if (this.state.role != null) {
             if (this.state.role == "Administrator") {
                 deletePermission = (
@@ -735,7 +732,7 @@ export class Home extends Component {
                     //onMoveFolder={this.handleRenameFolder}
                     //onMoveFile={this.handleRenameFolder}
                     />
-                    );
+                );
 
                 if (uploadFileName !== "") {
                     adminFileCheck = (
@@ -765,9 +762,9 @@ export class Home extends Component {
         if (this.state.downloadFileName.trim() === "") {
             download = (
                 <div style={{ textAlign: "right" }}>
-                    <Button style={{cursor: "default", backgroundColor: "gray"}}>Download</Button>
+                    <Button style={{ cursor: "default", backgroundColor: "gray" }}>Download</Button>
                 </div>
-                );
+            );
         }
         //    if (noFiles && !loading) {
         //        content =
@@ -790,32 +787,32 @@ export class Home extends Component {
             content =
                 (
                     <React.Fragment>
-                    <div id="file_browser" className="div-files">
-                        {deletePermission}
-                    </div>
-                    {download}
+                        <div id="file_browser" className="div-files">
+                            {deletePermission}
+                        </div>
+                        {download}
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
-                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
 
-                            <Container>
-                                <Row>
-                                    <Col style={{ width: "100%", textAlign: "center" }}>
-                                        {adminFileCheck}
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col style={{width: "50%", textAlign: "center"}}>
-                                        <Button variant="secondary" onClick={this.handleModalClose}>
-                                            Close
+                                <Container>
+                                    <Row>
+                                        <Col style={{ width: "100%", textAlign: "center" }}>
+                                            {adminFileCheck}
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            <Button variant="secondary" onClick={this.handleModalClose}>
+                                                Close
                                         </Button>
-                                    </Col>
-                                    <Col style={{ width: "50%", textAlign: "center" }}>
-                                        {browseOrUpload}
-                                    </Col>
-                                </Row>
-                            </Container>
+                                        </Col>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            {browseOrUpload}
+                                        </Col>
+                                    </Row>
+                                </Container>
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>

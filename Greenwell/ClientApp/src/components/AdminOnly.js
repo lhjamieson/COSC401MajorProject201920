@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import authService from './api-authorization/AuthorizeService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner, faTrash, faLevelUpAlt, faLevelDownAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faTrash, faLevelUpAlt, faLevelDownAlt, faUserPlus, faCheck, faTimes, faFileDownload } from '@fortawesome/free-solid-svg-icons';
+import { saveAs } from 'file-saver';
 
 export class AdminOnly extends Component {
     static displayName = AdminOnly.name;
@@ -18,8 +19,12 @@ export class AdminOnly extends Component {
             showDeleteUserModal: false,
             showMakeUserAdminModal: false,
             showMakeAdminNonAdminModal: false,
+            showApproveModal: false,
+            showRejectModal: false,
             showAddUserModal: false,
             userInAction: null,
+            files: [],
+            fileSelected: null,
         }
 
 
@@ -40,7 +45,81 @@ export class AdminOnly extends Component {
                 loading: false
             });
         }
+
+
+        let getUnapprovedFiles = async () => {
+            const token = await authService.getAccessToken();
+            const response = await fetch('api/GreenWellFiles/UnapprovedFiles', {
+                method: 'POST',
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await response.json();
+            console.log(json);
+            if (json.files.length == 0) {
+                this.setState({
+                    files: [],
+                });
+            }
+            else {
+                var i;
+                var t = [];
+                for (i = 0; i < json.files.length; i++) {
+                    var r1 = {
+                        key: json.files[i]
+                    };
+                    t.push(r1);
+                }
+                this.setState({
+                    files: t,
+                });
+                console.log(t);
+            }
+        }
         getUsers();
+        getUnapprovedFiles();
+    }
+
+    resolveFile = async (fileToApprove, approval) => {
+        const token = await authService.getAccessToken();
+        let formData = new FormData();
+        console.log(typeof (fileToApprove));
+        formData.append("fullPath", fileToApprove);
+        formData.append("approval", approval);
+        const response = await fetch('api/GreenWellFiles/ResolveApproval', {
+            method: 'POST',
+            body: formData,
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await response.json();
+
+        this.setState(state => {
+            let newFiles = []
+            state.files.map((file) => {
+                if (file.key.fullPath !== fileToApprove) {
+                    newFiles.push(file)
+                }
+            })
+            state.files = newFiles;
+            state.showApproveModal = false;
+            state.showRejectModal = false;
+            return state
+        })
+    };
+
+    downloadFile = async (fileToDownload) => {
+        let fileName = fileToDownload.split("/")[fileToDownload.split("/").length - 1];
+        let formData = new FormData();
+        formData.append("filePath", fileToDownload)
+        const token = await authService.getAccessToken();
+        const response = await fetch('api/GreenWellFiles/DownloadAFile', {
+            method: 'POST',
+            body: formData,
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
+
+        const blob = await response.blob();
+        saveAs(blob, fileName);
+
     }
 
     deleteAUser = async (userToDelete) => {
@@ -134,7 +213,7 @@ export class AdminOnly extends Component {
             nonAdminUsers: json.nonAdminUsers,
             showMakeAdminNonAdminModal: false,
             userInAction: null
-        }); 
+        });
     };
 
     render() {
@@ -158,8 +237,8 @@ export class AdminOnly extends Component {
                             <Button onClick={() => this.setState({ showDeleteUserModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => this.deleteAUser(this.state.userInAction)} variant="primary">Delete</Button>
                         </Modal.Footer>
-
                     </Modal>
+
                     <Modal show={this.state.showMakeUserAdminModal} onHide={() => this.setState({ showMakeUserAdminModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
                             <Modal.Title>Confirm</Modal.Title>
@@ -171,8 +250,8 @@ export class AdminOnly extends Component {
                             <Button onClick={() => this.setState({ showMakeUserAdminModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => this.makeUserAdmin(this.state.userInAction)} variant="primary">Make Admin</Button>
                         </Modal.Footer>
-
                     </Modal>
+
                     <Modal show={this.state.showMakeAdminNonAdminModal} onHide={() => this.setState({ showMakeAdminNonAdminModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
                             <Modal.Title>Confirm</Modal.Title>
@@ -220,12 +299,13 @@ export class AdminOnly extends Component {
                                     }
                                 }
                                 else {
-                                        document.getElementById('error').innerHTML = "Invalid Email";
+                                    document.getElementById('error').innerHTML = "Invalid Email";
                                 }
                             }
                             } variant="primary">Add</Button>
                         </Modal.Footer>
                     </Modal>
+
                     <div style={{ display: "flex", justifyContent: "center" }}>
                         <h3>Admin Actions</h3>
                     </div>
@@ -295,11 +375,91 @@ export class AdminOnly extends Component {
                             </tbody>
                         </Table>
                     </div>
-                    <React.Fragment>
-                        <Link onClick={() => this.setState({ showAddUserModal: true })}>
-                            <FontAwesomeIcon title="Add New User" style={{ color: "#73a353", marginLeft: "8%" }} className="fa-2x" icon={faUserPlus} />
-                        </Link>
-                    </React.Fragment>
+                    <Link onClick={() => this.setState({ showAddUserModal: true })}>
+                        <FontAwesomeIcon title="Add New User" style={{ color: "#73a353", marginLeft: "8%" }} className="fa-2x" icon={faUserPlus} />
+                    </Link>
+
+
+
+
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <h3>Approve Files</h3>
+                    </div>
+
+                    <Modal show={this.state.showApproveModal} onHide={() => this.setState({ showApproveModal: false, fileSelected: null })}>
+                        <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
+                            <Modal.Title>Confirm</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                            <p>Are you sure you want to approve this file?</p>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Button onClick={() => this.setState({ showApproveModal: false, fileSelected: null })} variant="secondary">Cancel</Button>
+                            <Button onClick={() => this.resolveFile(this.state.fileSelected, true)} variant="primary">Approve</Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    <Modal show={this.state.showRejectModal} onHide={() => this.setState({ showRejectModal: false, fileSelected: null })}>
+                        <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
+                            <Modal.Title>Confirm</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                            <p>Are you sure you want to reject this file, it will be permenently deleted from the server.</p>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Button onClick={() => this.setState({ showRejectModal: false, fileSelected: null })} variant="secondary">Cancel</Button>
+                            <Button onClick={() => this.resolveFile(this.state.fileSelected, false)} variant="primary">Reject</Button>
+                        </Modal.Footer>
+                    </Modal>
+
+
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <Table striped bordered hover style={{ width: "75%" }}>
+                            <thead>
+                                <tr>
+                                    <th>Actions</th>
+                                    <th>Filename</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(this.state.files.length == 0) &&
+                                    <tr>
+                                        <th>No files.</th>
+                                        <th>No files.</th>
+                                    </tr>
+                                }
+
+                                {this.state.files.length != 0 &&
+                                    this.state.files.map(file =>
+                                        <tr key={file.key.filename}>
+                                            <td>{
+                                                <React.Fragment>
+                                                    <Link onClick={() => this.setState({ showApproveModal: true, fileSelected: file.key.fullPath })}>
+                                                        <FontAwesomeIcon title="Approve File" style={{ color: "#73a353" }} className="fa-2x" icon={faCheck} />
+                                                    </Link>
+                                                    <Link onClick={() => this.setState({ showRejectModal: true, fileSelected: file.key.fullPath })}>
+                                                        <FontAwesomeIcon title="Reject File" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faTimes} />
+                                                    </Link>
+                                                    <Link onClick={() => this.downloadFile(file.key.fullPath)}>
+                                                        <FontAwesomeIcon title="Download File" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faFileDownload} />
+                                                    </Link>
+                                                </React.Fragment>
+                                            }
+                                            </td>
+                                            <td>{file.key.filename}</td>
+
+                                        </tr>
+                                    )
+                                }
+
+
+                                <tr>
+                                    <th style={{ borderSpacing: "none", border: "none" }}></th>
+                                    <th style={{ borderSpacing: "none", border: "none" }}></th>
+                                </tr>
+                            </tbody>
+                        </Table>
+                    </div>
                 </React.Fragment>
             );
         }
