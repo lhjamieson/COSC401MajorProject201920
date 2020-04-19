@@ -39,20 +39,30 @@ export class Home extends Component {
 
         };
         // check and create the local storage
-        fetch('api/GreenWellFiles/CreateLocalStorage');
+        this.createStorage();
+
+
         // check the state of the user and get the files
         this.populateState();
-     
+
+    }
+
+    //Create storage on constructor
+    async createStorage() {
+        const token = await authService.getAccessToken();
+        fetch('api/GreenWellFiles/CreateLocalStorage', {
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
     }
 
     componentDidMount() {
         // add window event when component mounts
-        document.addEventListener("click", this.clicked);        
+        document.addEventListener("click", this.clicked);
     }
 
     componentWillUnmount() {
         // remove window event when component will unmount
-        document.removeEventListener("click", this.clicked); 
+        document.removeEventListener("click", this.clicked);
     }
 
     // method that gets the state of the user and get the files accordingly
@@ -60,9 +70,11 @@ export class Home extends Component {
         let getFiles = async (r) => {
             let formData = new FormData();
             formData.append("userIsAdmin", r);
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/GetAllFiles', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.files.length == 0) {
@@ -80,7 +92,8 @@ export class Home extends Component {
                 for (i = 0; i < json.files.length; i++) {
                     var r1 = {
                         key: json.files[i],
-                        size: 1
+                        size: 1000,
+                        modified: +Moment(),
                     };
                     t.push(r1);
                 }
@@ -107,8 +120,6 @@ export class Home extends Component {
         //}
     }
 
-
-
     clicked = () => {
         //alert("whole window clicked.");
         //alert(this.state.uploadFilePath);
@@ -118,13 +129,13 @@ export class Home extends Component {
             return;
         }
         setTimeout(() => {
-            if ( (document.getElementsByClassName("folder selected")[0] == null &&
-                document.getElementsByClassName("file selected")[0] == null) ) {
+            if ((document.getElementsByClassName("folder selected")[0] == null &&
+                document.getElementsByClassName("file selected")[0] == null)) {
                 //alert("clear path and name in whole window.");
-                    this.setState({
-                        uploadFilePath: "",
-                        downloadFileName: ""
-                    });
+                this.setState({
+                    uploadFilePath: "",
+                    downloadFileName: ""
+                });
             }
             //alert("finished whole window method.");
         }, 100);
@@ -139,7 +150,7 @@ export class Home extends Component {
         //alert("key file browser window clicked.");
         //alert(this.state.uploadFilePath);
         //alert(this.state.downloadFileName);
-        setTimeout(() => {  
+        setTimeout(() => {
             let element = document.getElementsByClassName("folder selected")[0];
             let element2 = document.getElementsByClassName("file selected")[0];
             if (element != null) {
@@ -187,7 +198,7 @@ export class Home extends Component {
                 //} while (find != null && find.className === "folder" && !foundParent)
                 this.setState({
                     //uploadFilePath: "",
-                    downloadFileName: path.substring(0,path.length - 1) 
+                    downloadFileName: path.substring(0, path.length - 1)
                 });
             }
             //alert("finished key file browser method.");
@@ -235,18 +246,20 @@ export class Home extends Component {
         // create object
         let formData = new FormData();
         formData.append("folderPath", key);
-        alert(key);
+        //alert(key);
         // define async function
         let createFolder = async () => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/AddAFolder', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.status === "200") {
                 this.setState(state => {
                     state.files = state.files.concat([{
-                        key: key
+                        key: key,
                     }])
                     return state
                 })
@@ -264,9 +277,11 @@ export class Home extends Component {
         formData.append("folderPath", folderKey.toString());
         // create async function
         let deleteFolder = async () => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DeleteAFolder', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             })
             const json = await response.json();
             if (json.status === "200") {
@@ -293,11 +308,13 @@ export class Home extends Component {
         const rf = [oldKey, newKey]
         // create async function
         let renameFolder = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/RenameAFolder', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -310,7 +327,6 @@ export class Home extends Component {
                             newFiles.push({
                                 ...file,
                                 key: file.key.replace(oldKey, newKey),
-                                modified: +Moment(),
                             })
                         } else {
                             newFiles.push(file)
@@ -332,11 +348,13 @@ export class Home extends Component {
         const rf = [oldKey, newKey]
         // create async function
         let renameFile = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/RenameAFile', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -350,7 +368,7 @@ export class Home extends Component {
                                 newFiles.push({
                                     ...file,
                                     key: newKey,
-                                    size: 1,
+                                    size: 1000,
                                     modified: +Moment(),
                                 })
                             } else {
@@ -458,11 +476,13 @@ export class Home extends Component {
         var df = fileKey.toString();
         // create async function
         let deleteFile = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DeleteAFile', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -537,16 +557,22 @@ export class Home extends Component {
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
             else
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.status === "200") {
                 this.setState(state => {
 
                     const addedNewFile = [];
-                    addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName, size: 1 });
+                    addedNewFile.push({
+                        key: this.state.uploadFilePath + "/" + this.state.uploadFileName,
+                        size: 1000,
+                        modified: +Moment(),
+                    });
 
                     const uniqueNewFiles = []
                     addedNewFile.map((newFile) => {
@@ -583,10 +609,11 @@ export class Home extends Component {
         let downloadFile = async () => {
             let formData = new FormData();
             formData.append("filePath", filePath)
-
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DownloadAFile', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
 
             const blob = await response.blob();
@@ -601,7 +628,8 @@ export class Home extends Component {
         for (i = 0; i < fs.length; i++) {
             var r1 = {
                 key: fs[i],
-                size: 1
+                size: 1000,
+                modified: +Moment(),
             };
             t.push(r1);
         }
@@ -621,7 +649,7 @@ export class Home extends Component {
         if (uploadFileName === "") {
             modalHeader = (
                 <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
-                    <Modal.Title>No File Selected.</Modal.Title>
+                    <Modal.Title>Upload A File.</Modal.Title>
                 </Modal.Header>
             );
             modalBody = (
@@ -663,8 +691,58 @@ export class Home extends Component {
             );
         }
         let adminFileCheck = null;
+        let deletePermission = (
+            <FileBrowser /*className="react-keyed-file-browser"*/
+                files={this.state.files}
+                icons={{
+                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                }}
+                onCreateFolder={this.handleCreateFolder}
+                onRenameFolder={this.handleRenameFolder}
+                onRenameFile={this.handleRenameFile}
+
+
+            // onCreateFiles={this.handleCreateFiles}
+
+            //onMoveFolder={this.handleRenameFolder}
+            //onMoveFile={this.handleRenameFolder}
+            />);
         if (this.state.role != null) {
             if (this.state.role == "Administrator") {
+                deletePermission = (
+                    <FileBrowser /*className="react-keyed-file-browser"*/
+                        files={this.state.files}
+                        icons={{
+                            File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                            Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                            PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                            Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                            Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                            FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                            Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                            Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                        }}
+                        onDeleteFolder={this.handleDeleteFolder}
+                        onDeleteFile={this.handleDeleteFile}
+                        onCreateFolder={this.handleCreateFolder}
+                        onRenameFolder={this.handleRenameFolder}
+                        onRenameFile={this.handleRenameFile}
+
+
+                    // onCreateFiles={this.handleCreateFiles}
+
+                    //onMoveFolder={this.handleRenameFolder}
+                    //onMoveFile={this.handleRenameFolder}
+                    />
+                );
+
                 if (uploadFileName !== "") {
                     adminFileCheck = (
                         <div>
@@ -693,9 +771,9 @@ export class Home extends Component {
         if (this.state.downloadFileName.trim() === "") {
             download = (
                 <div style={{ textAlign: "right" }}>
-                    <Button style={{cursor: "default", backgroundColor: "gray"}}>Download</Button>
+                    <Button style={{ cursor: "default", backgroundColor: "gray" }}>Download</Button>
                 </div>
-                );
+            );
         }
         //    if (noFiles && !loading) {
         //        content =
@@ -719,54 +797,31 @@ export class Home extends Component {
                 (
                     <React.Fragment>
                         <div id="file_browser" className="div-files">
-                            <FileBrowser /*className="react-keyed-file-browser"*/
-                                files={this.state.files}
-                                icons={{
-                                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
-                                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
-                                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
-                                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
-                                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
-                                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
-                                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
-                                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
-                                }}
-                                onCreateFolder={this.handleCreateFolder}
-                                onDeleteFolder={this.handleDeleteFolder}
-                                onRenameFolder={this.handleRenameFolder}
-
-                                onRenameFile={this.handleRenameFile}
-                                onDeleteFile={this.handleDeleteFile}
-
-                               // onCreateFiles={this.handleCreateFiles}
-
-                            //onMoveFolder={this.handleRenameFolder}
-                            //onMoveFile={this.handleRenameFolder}
-                            />
-                    </div>
-                    {download}
+                            {deletePermission}
+                        </div>
+                        {download}
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
-                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
 
-                            <Container>
-                                <Row>
-                                    <Col style={{ width: "100%", textAlign: "center" }}>
-                                        {adminFileCheck}
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col style={{width: "50%", textAlign: "center"}}>
-                                        <Button variant="secondary" onClick={this.handleModalClose}>
-                                            Close
+                                <Container>
+                                    <Row>
+                                        <Col style={{ width: "100%", textAlign: "center" }}>
+                                            {adminFileCheck}
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            <Button variant="secondary" onClick={this.handleModalClose}>
+                                                Close
                                         </Button>
-                                    </Col>
-                                    <Col style={{ width: "50%", textAlign: "center" }}>
-                                        {browseOrUpload}
-                                    </Col>
-                                </Row>
-                            </Container>
+                                        </Col>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            {browseOrUpload}
+                                        </Col>
+                                    </Row>
+                                </Container>
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
@@ -805,11 +860,14 @@ class GreenWellNavMenu extends Component {
     Search = (val) => {
         let search = async (p) => {
             let data = [p, this.state.searchBy, this.state.role];
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+
                 },
                 body: JSON.stringify(data)
             });
@@ -839,8 +897,8 @@ class GreenWellNavMenu extends Component {
                     <Dropdown onSelect={(evt) => this.setSearchBy(evt)} as={ButtonGroup}>
                         <Dropdown.Toggle id="dropdown" />
                         <Dropdown.Menu>
-                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName" active={this.state.searchBy === "fileName"}>Search By File Name</Dropdown.Item>
-                            <Dropdown.Item className="drop-down-item-style" eventKey="tags" active={this.state.searchBy === "tags"}> By Tags</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="fileName">Search By File Name</Dropdown.Item>
+                            <Dropdown.Item className="drop-down-item-style" eventKey="tags"> By Tags</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                     <Form inline>
