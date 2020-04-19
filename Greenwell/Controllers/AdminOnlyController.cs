@@ -103,7 +103,7 @@ namespace Greenwell.Controllers
         }
 
         [HttpPost("AddUser")]
-        public async Task<IActionResult> AddUser([FromForm] string currentUser, [FromForm] string userEmail)
+        public async Task<IActionResult> AddUser([FromForm] string currentUser, [FromForm] string userEmail, [FromForm] string userName)
         {
             Debug.WriteLine("Add User Request From " + userEmail);
 
@@ -120,7 +120,7 @@ namespace Greenwell.Controllers
                 ApplicationUser newAppUser = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = userEmail,
+                    UserName = userName,
                     //We confirm their email so that they can reset their password even if the haven't expressly confirmed their email.
                     EmailConfirmed = true
                 };
@@ -130,7 +130,6 @@ namespace Greenwell.Controllers
 
                 //We then generate the user so that we can send them an email to setup their account.
                 Task<IdentityResult> taskCreateAppUser = userManager.CreateAsync(newAppUser, userpass);
-                taskCreateAppUser.Wait();
 
 
                 //We check if the user was successfully created.
@@ -142,7 +141,6 @@ namespace Greenwell.Controllers
                  //Return user cannot be created error.
                 }
 
-                Debug.WriteLine("Users password: " + userpass);
 
                 //We add the user to the role, regardless if they existed before or not.
                 Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, "Member");

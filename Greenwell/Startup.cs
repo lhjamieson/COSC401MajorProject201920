@@ -191,7 +191,7 @@ namespace Greenwell
                 ApplicationUser newAppUser = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = userEmail,
+                    UserName = "Default Admin",
                     //Because we are only calling this on a demo user, we need just pretened the email has been confirmed, in the future,
                     EmailConfirmed = true
                 };

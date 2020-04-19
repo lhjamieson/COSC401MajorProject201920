@@ -109,12 +109,13 @@ export class AdminOnly extends Component {
         return false;
     }
 
-    addUser = async (userToAdd) => {
+    addUser = async (userToAdd, userName) => {
         const [user] = await Promise.all([authService.getUser()]);
         const token = await authService.getAccessToken();
         let formData = new FormData();
         formData.append("currentUser", user.name);
         formData.append("userEmail", userToAdd);
+        formData.append("userName", userName);
         const response = await fetch('api/AdminOnly/AddUser', {
             method: 'POST',
             body: formData,
@@ -150,6 +151,7 @@ export class AdminOnly extends Component {
                             <Button onClick={() => this.setState({ showDeleteUserModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => this.deleteAUser(this.state.userInAction)} variant="primary">Delete</Button>
                         </Modal.Footer>
+
                     </Modal>
                     <Modal show={this.state.showMakeUserAdminModal} onHide={() => this.setState({ showMakeUserAdminModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
@@ -162,6 +164,7 @@ export class AdminOnly extends Component {
                             <Button onClick={() => this.setState({ showMakeUserAdminModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => this.makeUserAdmin(this.state.userInAction)} variant="primary">Make Admin</Button>
                         </Modal.Footer>
+
                     </Modal>
                     <Modal show={this.state.showMakeAdminNonAdminModal} onHide={() => this.setState({ showMakeAdminNonAdminModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
@@ -181,18 +184,33 @@ export class AdminOnly extends Component {
                             <Modal.Title>Add New User</Modal.Title>
                         </Modal.Header>
                         <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
-                            <p>Enter the email of the intended new user, they will recieve an email instructing them how to finish setting up their account.</p>
-                            <label htmlFor="email">Email: </label>
-                            <input type="email" id="email"></input>
+                            <p>The user will receive an email instructing them how to finish setting up their account.</p>
+                            <hr></hr>
+                            <div>
+                                <b>Name  </b>
+                                <br></br>
+                                <input type="name" id="name"></input>
+                            </div>
+                            <br></br>
+                            <div>
+                                <b>Email  </b>
+                                <br></br>
+                                <input type="email" id="email"></input>
+                            </div>
                             <br></br><b id="error" style={{ color: "red" }}></b>
                         </Modal.Body>
                         <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
                             <Button onClick={() => this.setState({ showAddUserModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => {
-                                    if (this.validateEmail(document.getElementById('email').value)) {
+                                if (this.validateEmail(document.getElementById('email').value)) {
+                                    if (document.getElementById('name').value) {
                                         document.getElementById('error').innerHTML = "";
-                                        this.addUser(document.getElementById('email').value);
+                                        this.addUser(document.getElementById('email').value, document.getElementById('name').value);
                                         this.setState({ showAddUserModal: false, userInAction: null })
+                                    }
+                                    else {
+                                        document.getElementById('error').innerHTML = "Invalid Name";
+                                    }
                                 }
                                 else {
                                         document.getElementById('error').innerHTML = "Invalid Email";
@@ -209,8 +227,9 @@ export class AdminOnly extends Component {
                             <thead>
                                 <tr>
                                     <th>Actions</th>
-                                    <th>Users</th>
-                                    <th>Level</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -223,7 +242,7 @@ export class AdminOnly extends Component {
                                 }
                                 {this.state.adminUsers.length != 0 &&
                                     this.state.adminUsers.map(adminUsers =>
-                                        <tr key={adminUsers.userName}>
+                                        <tr key={adminUsers.email}>
                                             <td>{
                                                 <React.Fragment>
                                                     <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: adminUsers.userName })}>
@@ -236,6 +255,7 @@ export class AdminOnly extends Component {
                                             }
                                             </td>
                                             <td>{adminUsers.userName}</td>
+                                            <td>{adminUsers.email}</td>
                                             <td>Admin User</td>
                                         </tr>
                                     )
@@ -255,10 +275,12 @@ export class AdminOnly extends Component {
                                             }
                                             </td>
                                             <td>{nonAdminUsers.userName}</td>
-                                            <td>Normal User</td>
+                                            <td>{nonAdminUsers.email}</td>
+                                            <td>Default User</td>
                                         </tr>
                                     )}
                                 <tr>
+                                    <th style={{ borderSpacing: "none", border: "none" }}></th>
                                     <th style={{ borderSpacing: "none", border: "none" }}></th>
                                     <th style={{ borderSpacing: "none", border: "none" }}></th>
                                     <th style={{ borderSpacing: "none", border: "none" }}></th>
