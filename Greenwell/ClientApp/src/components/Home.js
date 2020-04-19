@@ -31,7 +31,8 @@ export class Home extends Component {
             tagsForFileUpload: [],
             changeModalBody: false,
             tagsForFilter: [],
-
+            showAlertModal: false,
+            alertMessage: null,
             downloadFileName: "",
             uploading: false,
 
@@ -279,13 +280,18 @@ export class Home extends Component {
                 this.setState(state => {
                     const newFiles = []
                     state.files.map((file) => {
-                        if (file.key.substr(0, folderKey.length) !== folderKey) {
-                            newFiles.push(file)
+                        if (file.key.substr(0, folderKey.toString().length) != folderKey) {
+                            newFiles.push(file);
                         }
-                    })
-                    state.files = newFiles
+                    });
+                    console.log("retained files:")
+                    console.log(newFiles)
+
+                    state.files = newFiles;
                     return state
-                })
+                });
+                console.log(this.state.files)
+
                 alert(json.message);
             }
             else alert(json.message);
@@ -296,6 +302,9 @@ export class Home extends Component {
 
     handleRenameFolder = (oldKey, newKey) => {
         // store old and new folder names
+        if (oldKey.charAt(0) == "/") {
+            oldKey = oldKey.substring(1, oldKey.length);
+        }
         const rf = [oldKey, newKey]
         // create async function
         let renameFolder = async (p) => {
@@ -538,6 +547,7 @@ export class Home extends Component {
                     tags.push(this.state.tagsForFileUpload[i]);
             }
         }
+
         let fullPath = this.state.uploadFilePath + this.state.uploadFileName;
         let addFile = async () => {
             let formData = new FormData();
@@ -580,7 +590,16 @@ export class Home extends Component {
                     });
                 }
                 else {
-                    alert('File has been sent for approval')
+                    this.setState({
+                        showAlertModal: true,
+                        showModal: false,
+                        uploadFile: null,
+                        uploadFileName: "",
+                        uploadFilePath: "",
+                        uploading: false,
+                        alertMessage: "File has been sent for approval."
+                    })
+                    return
                 }
                 this.setState({
                     showModal: false,
@@ -589,6 +608,18 @@ export class Home extends Component {
                     uploadFilePath: "",
                     uploading: false
                 });
+            }
+            else if (json.status === "201") {
+                console.log(json);
+                this.setState({
+                    showAlertModal: true,
+                    showModal: false,
+                    uploadFile: null,
+                    uploadFileName: "",
+                    uploadFilePath: "",
+                    uploading: false,
+                    alertMessage: "Unable to upload duplicate file."
+                })
             }
         }
         addFile();
@@ -816,7 +847,18 @@ export class Home extends Component {
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
-                        <Footer handleModalShow={this.handleModalShow} />
+                    <Footer handleModalShow={this.handleModalShow} />
+
+                    <Modal centered show={this.state.showAlertModal} onEnter={() => { document.getElementById("alert").innerHTML = this.state.alertMessage }} onHide={() => this.setState({ showAlertModal: false, alertMesssage: null })}>
+                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                            <p id="alert"></p>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Button onClick={() => { this.setState({ showAlertModal: false, alertMesssage: null }) }} variant="primary">Ok</Button>
+                        </Modal.Footer>
+                    </Modal>
+
+
                     </React.Fragment>
                 );
         }

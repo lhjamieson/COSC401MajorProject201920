@@ -161,6 +161,12 @@ namespace Greenwell.Controllers
         [HttpPost("AddFileFromUpload")]
         public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags)
         {
+
+            if (_context.Files.Where(f => (f.FullPath.Equals(path))).Any())
+            {
+                return Ok(new { message = "Unable to upload duplicate file.", status = "201" });
+            }
+            
             try
             {
                 //If there are tags associated with the file, split at commas to create a list.
@@ -253,6 +259,12 @@ namespace Greenwell.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> AdminAddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags, bool adminAccessOnly)
         {
+            if (_context.Files.Where(f => (f.FullPath.Equals(path))).Any())
+            {
+                return Ok(new { message = "Unable to upload duplicate file.", status = "201" });
+            }
+
+
             try
             {
                 //If there are tags associated with the file, split at commas to create a list.
@@ -430,7 +442,8 @@ namespace Greenwell.Controllers
             {
                 Greenwell.Data.Models.Files folder = new Greenwell.Data.Models.Files
                 {
-                    FullPath = folderPath
+                    FullPath = folderPath,
+                    Approved = true
                 };
                 await _context.Files.AddAsync(folder);
                 await _context.SaveChangesAsync();
@@ -483,10 +496,10 @@ namespace Greenwell.Controllers
             try
             {
                 //remove all instances of file in database, and delete from local storage
-                int id = _context.Files.SingleOrDefault(a => a.Filename == System.IO.Path.GetFileName(p)).FileId;
+                int id = _context.Files.SingleOrDefault(a => a.FullPath == p).FileId;
                 _context.RemoveRange(_context.Tagmap.Where(a => a.FileId == id));
                 await _context.SaveChangesAsync();
-                _context.Files.Remove(_context.Files.SingleOrDefault(a => a.Filename == System.IO.Path.GetFileName(p)));
+                _context.Files.Remove(_context.Files.SingleOrDefault(a => a.FullPath == p));
                 await _context.SaveChangesAsync();
 
                 string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage\";
