@@ -46,7 +46,7 @@ namespace Greenwell.Controllers
         [HttpPost("DeleteUser")]
         public async Task<IActionResult> DeleteUser([FromForm] string currentUser, [FromForm] string userToDelete)
         {
-            var passedUser = await userManager.FindByNameAsync(userToDelete.ToString());
+            var passedUser = await userManager.FindByEmailAsync(userToDelete.ToString());
 
             // delete the user
             await userManager.DeleteAsync(passedUser);
@@ -65,7 +65,7 @@ namespace Greenwell.Controllers
         [HttpPost("MakeUserAdmin")]
         public async Task<IActionResult> MakeUserAdmin([FromForm] string currentUser, [FromForm] string userToMakeAdmin)
         {
-            var passedUser = await userManager.FindByNameAsync(userToMakeAdmin.ToString());
+            var passedUser = await userManager.FindByEmailAsync(userToMakeAdmin.ToString());
 
             // make non-admin user admin
             await userManager.RemoveFromRoleAsync(passedUser, "Member");
@@ -85,7 +85,7 @@ namespace Greenwell.Controllers
         [HttpPost("MakeUserNonAdmin")]
         public async Task<IActionResult> MakeUserNonAdmin([FromForm] string currentUser, [FromForm] string userToMakeNonAdmin)
         {
-            var passedUser = await userManager.FindByNameAsync(userToMakeNonAdmin.ToString());
+            var passedUser = await userManager.FindByEmailAsync(userToMakeNonAdmin.ToString());
 
             // make non-admin user admin
             await userManager.RemoveFromRoleAsync(passedUser, "Administrator");

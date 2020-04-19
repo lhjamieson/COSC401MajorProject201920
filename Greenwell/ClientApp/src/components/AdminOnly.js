@@ -104,9 +104,16 @@ export class AdminOnly extends Component {
     };
 
     validateEmail = (email) => {
-        if (/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(email))
+        if (/^[a-zA-Z0-9!#$%&'*+-/=?^_`{|]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(email))
             return true;
         return false;
+    }
+
+    validateUsername = (username) => {
+        if (/^[a-zA-Z0-9-._@+ ]+$/.test(username))
+            return true;
+        return false;
+
     }
 
     addUser = async (userToAdd, userName) => {
@@ -203,7 +210,7 @@ export class AdminOnly extends Component {
                             <Button onClick={() => this.setState({ showAddUserModal: false, userInAction: null })} variant="secondary">Cancel</Button>
                             <Button onClick={() => {
                                 if (this.validateEmail(document.getElementById('email').value)) {
-                                    if (document.getElementById('name').value) {
+                                    if (this.validateUsername(document.getElementById('name').value)) {
                                         document.getElementById('error').innerHTML = "";
                                         this.addUser(document.getElementById('email').value, document.getElementById('name').value);
                                         this.setState({ showAddUserModal: false, userInAction: null })
@@ -245,10 +252,10 @@ export class AdminOnly extends Component {
                                         <tr key={adminUsers.email}>
                                             <td>{
                                                 <React.Fragment>
-                                                    <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: adminUsers.userName })}>
+                                                    <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: adminUsers.email })}>
                                                         <FontAwesomeIcon title="Delete User" style={{ color: "#73a353" }} className="fa-2x" icon={faTrash} />
                                                     </Link>
-                                                    <Link onClick={() => this.setState({ showMakeAdminNonAdminModal: true, userInAction: adminUsers.userName })}>
+                                                    <Link onClick={() => this.setState({ showMakeAdminNonAdminModal: true, userInAction: adminUsers.email })}>
                                                         <FontAwesomeIcon title="Remove Admin Role" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faLevelDownAlt} />
                                                     </Link>
                                                 </React.Fragment>
@@ -265,10 +272,10 @@ export class AdminOnly extends Component {
                                         <tr key={nonAdminUsers.userName}>
                                             <td>{
                                                 <React.Fragment>
-                                                    <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: nonAdminUsers.userName })}>
+                                                    <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: nonAdminUsers.email })}>
                                                         <FontAwesomeIcon title="Delete User" style={{ color: "#73a353" }} className="fa-2x" icon={faTrash} />
                                                     </Link>
-                                                    <Link onClick={() => this.setState({ showMakeUserAdminModal: true, userInAction: nonAdminUsers.userName })}>
+                                                    <Link onClick={() => this.setState({ showMakeUserAdminModal: true, userInAction: nonAdminUsers.email })}>
                                                         <FontAwesomeIcon title="Make User Admin" style={{ color: "#73a353", marginLeft: "15px" }} className="fa-2x" icon={faLevelUpAlt} />
                                                     </Link>
                                                 </React.Fragment>
