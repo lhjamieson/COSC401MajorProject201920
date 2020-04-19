@@ -39,10 +39,20 @@ export class Home extends Component {
 
         };
         // check and create the local storage
-        fetch('api/GreenWellFiles/CreateLocalStorage');
+        this.createStorage();
+    
+
         // check the state of the user and get the files
         this.populateState();
      
+    }
+
+    //Create storage on constructor
+    async createStorage() {
+        const token = await authService.getAccessToken();
+        fetch('api/GreenWellFiles/CreateLocalStorage', {
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        });
     }
 
     componentDidMount() {
@@ -60,9 +70,11 @@ export class Home extends Component {
         let getFiles = async (r) => {
             let formData = new FormData();
             formData.append("userIsAdmin", r);
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/GetAllFiles', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.files.length == 0) {
@@ -237,9 +249,11 @@ export class Home extends Component {
         alert(key);
         // define async function
         let createFolder = async () => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/AddAFolder', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.status === "200") {
@@ -263,9 +277,11 @@ export class Home extends Component {
         formData.append("folderPath", folderKey.toString());
         // create async function
         let deleteFolder = async () => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DeleteAFolder', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             })
             const json = await response.json();
             if (json.status === "200") {
@@ -292,11 +308,13 @@ export class Home extends Component {
         const rf = [oldKey, newKey]
         // create async function
         let renameFolder = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/RenameAFolder', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -331,11 +349,13 @@ export class Home extends Component {
         const rf = [oldKey, newKey]
         // create async function
         let renameFile = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/RenameAFile', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -456,11 +476,13 @@ export class Home extends Component {
         var df = fileKey.toString();
         // create async function
         let deleteFile = async (p) => {
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DeleteAFile', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify(p)
             })
@@ -535,9 +557,11 @@ export class Home extends Component {
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
             else
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
             if (json.status === "200") {
@@ -581,10 +605,11 @@ export class Home extends Component {
         let downloadFile = async () => {
             let formData = new FormData();
             formData.append("filePath", filePath)
-
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/DownloadAFile', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
 
             const blob = await response.blob();
@@ -660,8 +685,58 @@ export class Home extends Component {
             );
         }
         let adminFileCheck = null;
+        let deletePermission = (
+            <FileBrowser /*className="react-keyed-file-browser"*/
+            files={this.state.files}
+            icons={{
+                File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+            }}
+            onCreateFolder={this.handleCreateFolder}
+            onRenameFolder={this.handleRenameFolder}
+            onRenameFile={this.handleRenameFile}
+
+
+        // onCreateFiles={this.handleCreateFiles}
+
+        //onMoveFolder={this.handleRenameFolder}
+        //onMoveFile={this.handleRenameFolder}
+        />);
         if (this.state.role != null) {
             if (this.state.role == "Administrator") {
+                deletePermission = (
+                    <FileBrowser /*className="react-keyed-file-browser"*/
+                        files={this.state.files}
+                        icons={{
+                            File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                            Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                            PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                            Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                            Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                            FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                            Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                            Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                        }}
+                        onDeleteFolder={this.handleDeleteFolder}
+                        onDeleteFile={this.handleDeleteFile}
+                        onCreateFolder={this.handleCreateFolder}
+                        onRenameFolder={this.handleRenameFolder}
+                        onRenameFile={this.handleRenameFile}
+
+
+                    // onCreateFiles={this.handleCreateFiles}
+
+                    //onMoveFolder={this.handleRenameFolder}
+                    //onMoveFile={this.handleRenameFolder}
+                    />
+                    );
+
                 if (uploadFileName !== "") {
                     adminFileCheck = (
                         <div>
@@ -715,31 +790,8 @@ export class Home extends Component {
             content =
                 (
                     <React.Fragment>
-                        <div id="file_browser" className="div-files">
-                            <FileBrowser /*className="react-keyed-file-browser"*/
-                                files={this.state.files}
-                                icons={{
-                                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
-                                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
-                                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
-                                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
-                                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
-                                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
-                                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
-                                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
-                                }}
-                                onCreateFolder={this.handleCreateFolder}
-                                onDeleteFolder={this.handleDeleteFolder}
-                                onRenameFolder={this.handleRenameFolder}
-
-                                onRenameFile={this.handleRenameFile}
-                                onDeleteFile={this.handleDeleteFile}
-
-                               // onCreateFiles={this.handleCreateFiles}
-
-                            //onMoveFolder={this.handleRenameFolder}
-                            //onMoveFile={this.handleRenameFolder}
-                            />
+                    <div id="file_browser" className="div-files">
+                        {deletePermission}
                     </div>
                     {download}
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
@@ -802,11 +854,14 @@ class GreenWellNavMenu extends Component {
     Search = (val) => {
         let search = async (p) => {
             let data = [p, this.state.searchBy, this.state.role];
+            const token = await authService.getAccessToken();
             const response = await fetch('api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+
                 },
                 body: JSON.stringify(data)
             });

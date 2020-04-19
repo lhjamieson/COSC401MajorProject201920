@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+//Profile service extends the existing ProfileService method to add roles and role claims to profile data.
 public class ProfileService : IProfileService
 {
     protected UserManager<ApplicationUser> mUserManager;
@@ -18,10 +19,13 @@ public class ProfileService : IProfileService
 
     public async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
+        //We get the user
         ApplicationUser user = await mUserManager.GetUserAsync(context.Subject);
 
+        //We get a list of the user's roles
         IList<string> roles = await mUserManager.GetRolesAsync(user);
 
+        //We add a claim to every role on the lost.
         IList<Claim> roleClaims = new List<Claim>();
         foreach (string role in roles)
         {

@@ -4,14 +4,15 @@ import { Route, Redirect } from 'react-router-dom'
 import { ApplicationPaths, QueryParameterNames } from './ApiAuthorizationConstants'
 import authService from './AuthorizeService'
 
-//Authorize route allows us to check if a user is authenticated before allowing them to acsess a resource.
-export default class AuthorizeRoute extends Component {
+//Authorize admin route allows us to prevent employee user from accessing admin only resources.
+export default class AuthorizeAdminRoute extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             ready: false,
-            authenticated: false
+            authenticated: false,
+            admin: false
         };
     }
 
@@ -24,21 +25,20 @@ export default class AuthorizeRoute extends Component {
         authService.unsubscribe(this._subscription);
     }
 
-    //If they are authenticated we return a route to the indented resource, outherwise we redirect them
+    //We check if they are logged in and an admin, if so we send them to the intended resource with a route
+    //If not show them a you are unauthorized message.
     render() {
-        const { ready, authenticated } = this.state;
-        //Redirect to the login page as if you are not authenticated at all, you need to login.
-        const redirectUrl = `${ApplicationPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURI(window.location.href)}`
+        const { ready, authenticated, admin } = this.state;
         if (!ready) {
             return <div></div>;
         } else {
             const { component: Component, ...rest } = this.props;
             return <Route {...rest}
                 render={(props) => {
-                    if (authenticated) {
+                    if (authenticated && admin) {
                         return <Component {...props} />
                     } else {
-                        return <Redirect to={redirectUrl} />
+                        return <div>You are unauthorized to access this page.</div>
                     }
                 }} />
         }
@@ -46,11 +46,17 @@ export default class AuthorizeRoute extends Component {
 
     async populateAuthenticationState() {
         const authenticated = await authService.isAuthenticated();
-        this.setState({ ready: true, authenticated });
+        var admin = null;
+        const user = await authService.getUser();
+        if (user && user.role == "Administrator") 
+            admin = true;
+        else 
+            admin = false;
+        this.setState({ ready: true, authenticated, admin });
     }
 
     async authenticationChanged() {
-        this.setState({ ready: false, authenticated: false });
+        this.setState({ ready: false, authenticated: false, admin: false });
         await this.populateAuthenticationState();
     }
 }

@@ -23,7 +23,7 @@ namespace Greenwell.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
         }
 
-        public string Username { get; set; }
+        public string Name { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -43,7 +43,7 @@ namespace Greenwell.Areas.Identity.Pages.Account.Manage
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
-            Username = userName;
+            Name = userName;
 
             Input = new InputModel
             {

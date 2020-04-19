@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Greenwell.Data;
 using Greenwell.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,8 @@ using Newtonsoft.Json.Linq;
 namespace Greenwell.Controllers
 {
     [Route("api/[controller]")]
+    //Forces all api calls to be authorized
+    [Authorize]
     public class GreenWellFilesController : Controller
     {
         private readonly greenwelldatabaseContext _context;
@@ -70,11 +74,11 @@ namespace Greenwell.Controllers
                     return Ok(new { status = "empty search bar", files = _context.Files.Where(p => p.AdminOnly != true).Select(p => p.FullPath).ToList() });
                 }
                 //list of all files that begin with the search query, for main admin case
-                var fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower())).Select(p => p.Filename).ToList();
+                var fs = _context.Files.Where(a => a.Filename.ToLower().Contains(data[0].Trim().ToLower())).Select(p => p.Filename).ToList();
                 // check if user is not admin, and if so return only files without admin only
                 if (data[2] != "Administrator")
                 {
-                    fs = _context.Files.Where(a => a.Filename.ToLower().StartsWith(data[0].Trim().ToLower()) & a.AdminOnly != true).Select(p => p.Filename).ToList();
+                    fs = _context.Files.Where(a => a.Filename.ToLower().Contains(data[0].Trim().ToLower()) & a.AdminOnly != true).Select(p => p.Filename).ToList();
                     // in case there is no files for the check with non admin
                     if (fs.Count() == 0)
                     {
@@ -137,21 +141,32 @@ namespace Greenwell.Controllers
                     //Add the tags to the ids list for use later.
                     for (int i = 0; i < tags.Length; i++)
                     {
-                        ts = new Greenwell.Data.Models.Tags
-                        {
-                            TagName = tags[i]
-                        };
-                        await _context.Tags.AddAsync(ts);
-                        await _context.SaveChangesAsync();
-                        ids.Add(ts.TagId);
+                        //We check to see if the tag already exists, if its new we add it
+                        var check = _context.Tags.FirstOrDefault(a => a.TagName.Equals(tags[i]));
+                        if (check == null){
+
+                            ts = new Greenwell.Data.Models.Tags
+                            {
+                                TagName = tags[i]
+                            };
+                            await _context.Tags.AddAsync(ts);
+                            await _context.SaveChangesAsync();
+                            ids.Add(ts.TagId);
+                        }
+                        //If the tag already exists, we find add that found TagId.
+                        else {
+                            ids.Add(check.TagId);
+                        }
                     }
                 }
+                //After collecting the tags we make a new file with the path and filename of their file.
                 Greenwell.Data.Models.Files file = new Greenwell.Data.Models.Files
                 {
                     FullPath = path,
                     Filename = System.IO.Path.GetFileName(path)
                 };
 
+                //If its admin only we mark it as such.
                 if (adminAccessOnly)
                 {
                     file = new Greenwell.Data.Models.Files
@@ -161,6 +176,7 @@ namespace Greenwell.Controllers
                         AdminOnly = true
                     };
                 }
+
                 await _context.Files.AddAsync(file);
                 await _context.SaveChangesAsync();
 
@@ -194,6 +210,7 @@ namespace Greenwell.Controllers
                     f.CopyTo(stream);
                     stream.Dispose();
                 }
+            
             }
             
             //If we receive error code 500, then something with the server went wrong. It's not specific, but
@@ -310,7 +327,8 @@ namespace Greenwell.Controllers
             }
         }
 
-        //Delete folder
+        //Delete folder, authorized only to administrators
+        [Authorize(Roles = "Administrator")]
         [HttpPost("DeleteAFolder")]
         public async Task<ActionResult> DeleteAFolder([FromForm] string folderPath)
         {
@@ -339,7 +357,9 @@ namespace Greenwell.Controllers
         }
 
         //Delete file
+        //Authorized only to administrators
         [HttpPost("DeleteAFile")]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> DeleteAFile([FromBody] string p)
         {
             try
