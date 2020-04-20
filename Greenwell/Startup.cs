@@ -2,6 +2,7 @@
 using Greenwell.Data;
 using Greenwell.Data.Models;
 using Greenwell.Models;
+using Greenwell.Services;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,14 +35,6 @@ namespace Greenwell
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
-            
-            services.AddControllersWithViews();
-            services.AddRazorPages();
-
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -57,7 +51,11 @@ namespace Greenwell
                  )
              );
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>( options => {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+                options.SignIn.RequireConfirmedAccount = true; 
+                
+            })
                 .AddRoles<IdentityRole>()
                 .AddRoleManager<RoleManager<IdentityRole>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -65,13 +63,30 @@ namespace Greenwell
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
                 .AddIdentityServerJwt();
 
-            //Here we add the profile service so our react profile includes a role..
+            //Here we add the profile service so our react profile includes a role.
             services.AddTransient<IProfileService, ProfileService>();
+            
+            //Configuration for email sending.
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
 
-            // In production, the React files will be served from this directory
+
+            
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/build";
+            });
 
         }
 
@@ -96,6 +111,7 @@ namespace Greenwell
 
             app.UseRouting();
 
+            
             app.UseAuthentication();
             app.UseIdentityServer();
             app.UseAuthorization();
@@ -132,10 +148,15 @@ namespace Greenwell
                 CreateRole(serviceProvider, roleName);
             }
 
-            // TODO: Get these value from "appsettings.json" file. 
+            //Create Admin User
             string adminUserEmail = "admin@test.com";
             string adminPwd = "Password_123";
-            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, adminRoleName);
+            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, adminRoleName, "Default Admin");
+
+            //Create Default User
+            string defaultUsername = "default@test.com";
+            string defaultPwd = "Password_123";
+            AddUserToRole(serviceProvider, defaultUsername, defaultPwd, "Member", "Default User");
         }
 
 
@@ -161,10 +182,9 @@ namespace Greenwell
         //We call this on user creation as there is existing code that creates the user all ready and every user is automatically added to the "Member" role.
         //This is however helpful for adding a default admin user above and could be used in the future.
         private static void AddUserToRole(IServiceProvider serviceProvider, string userEmail,
-            string userPwd, string roleName)
+            string userPwd, string roleName, string userName)
         {
-            //TEMP
-            Console.WriteLine(userEmail + userPwd + roleName);
+
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             
             //We search to see if the intended user already exists
@@ -179,7 +199,7 @@ namespace Greenwell
                 ApplicationUser newAppUser = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = userEmail,
+                    UserName = userName,
                     //Because we are only calling this on a demo user, we need just pretened the email has been confirmed, in the future,
                     EmailConfirmed = true
                 };

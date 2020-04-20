@@ -18,6 +18,8 @@ namespace Greenwell.Data.Models
         public string ExtType { get; set; }
         public double? FileSize { get; set; }
         public bool? AdminOnly { get; set; }
+        public bool? Approved { get; set; }
+
 
         public Users AuthorNavigation { get; set; }
         public ICollection<Tagmap> Tagmap { get; set; }
