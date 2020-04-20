@@ -551,7 +551,7 @@ namespace Greenwell.Controllers
             try
             {
                 //Create path with new name, then update database and local files
-                var path = _context.Files.FirstOrDefault(a => a.FullPath.StartsWith(p[0]));
+                var path = _context.Files.FirstOrDefault(a => a.FullPath == p[0]);
                 path.FullPath = p[1];
                 path.Filename = System.IO.Path.GetFileName(p[1]);
                 _context.Files.Update(path);

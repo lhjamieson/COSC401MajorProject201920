@@ -148,10 +148,15 @@ namespace Greenwell
                 CreateRole(serviceProvider, roleName);
             }
 
-            // TODO: Get these value from "appsettings.json" file. 
+            //Create Admin User
             string adminUserEmail = "admin@test.com";
             string adminPwd = "Password_123";
-            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, adminRoleName);
+            AddUserToRole(serviceProvider, adminUserEmail, adminPwd, adminRoleName, "Default Admin");
+
+            //Create Default User
+            string defaultUsername = "default@test.com";
+            string defaultPwd = "Password_123";
+            AddUserToRole(serviceProvider, defaultUsername, defaultPwd, "Member", "Default User");
         }
 
 
@@ -177,10 +182,9 @@ namespace Greenwell
         //We call this on user creation as there is existing code that creates the user all ready and every user is automatically added to the "Member" role.
         //This is however helpful for adding a default admin user above and could be used in the future.
         private static void AddUserToRole(IServiceProvider serviceProvider, string userEmail,
-            string userPwd, string roleName)
+            string userPwd, string roleName, string userName)
         {
-            //TEMP
-            Console.WriteLine(userEmail + userPwd + roleName);
+
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             
             //We search to see if the intended user already exists
@@ -195,7 +199,7 @@ namespace Greenwell
                 ApplicationUser newAppUser = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = "Default Admin",
+                    UserName = userName,
                     //Because we are only calling this on a demo user, we need just pretened the email has been confirmed, in the future,
                     EmailConfirmed = true
                 };

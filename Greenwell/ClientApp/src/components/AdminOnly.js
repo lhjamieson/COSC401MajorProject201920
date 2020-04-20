@@ -72,7 +72,6 @@ export class AdminOnly extends Component {
                 this.setState({
                     files: t,
                 });
-                console.log(t);
             }
         }
         getUsers();

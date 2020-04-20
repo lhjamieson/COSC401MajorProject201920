@@ -168,14 +168,11 @@ export class Home extends Component {
                             newFiles.push(file);
                         }
                     });
-                    console.log("retained files:")
-                    console.log(newFiles)
-
+                    //If a folder is deleted the upload path should reflect that.
+                    state.uploadFilePath = "";
                     state.files = newFiles;
                     return state
                 });
-                console.log(this.state.files)
-
                 alert(json.message);
             }
             else alert(json.message);
@@ -217,6 +214,8 @@ export class Home extends Component {
                             newFiles.push(file)
                         }
                     })
+                    //If the folder is renamed, the uploadPath should reflect that.
+                    state.uploadFilePath = newKey
                     state.files = newFiles
                     return state
                 })
@@ -259,7 +258,9 @@ export class Home extends Component {
                                 newFiles.push(file)
                             }
                         })
-                        state.files = newFiles
+                        state.files = newFiles;
+                        //If the file name is altered, our selection should reflect that.
+                        state.downloadFileName = newKey;
                         return state
                     })
                 })
@@ -271,89 +272,6 @@ export class Home extends Component {
         renameFile(rf);
     }
 
-    //handleCreateFiles = (files, prefix) => {
-    //    //console.log(files);
-    //    if (files == "" & prefix == "") {
-    //        alert("ok");
-    //        files = [this.state.uploadFile];
-    //        prefix = this.state.uploadFilePath;
-    //        alert(prefix);
-    //    }
-    //    // get the file/files full path
-    //    // put file/files string path/s in array
-    //    var fi;
-    //    let res = files.map((f) => {
-    //        fi = f;
-    //        return f.name
-    //    });
-    //    let p = [];
-    //    let p2 = []
-    //    if (files.length > 1) {
-    //        res = res.toString().split(",");
-    //        var i;
-    //        for (i = 0; i < res.length; i++) {
-    //            res[i] = prefix + res[i];
-    //            p2.push(files[i]);
-    //        }
-    //        p = [...res];
-    //    }
-    //    else {
-    //        res = prefix + res;
-    //        p = [res];
-    //        p2 = [fi];
-    //    }
-    //    // create async function
-    //    let addFile = async (cf, f) => {
-    //        let formData = new FormData();
-    //        for (let i = 0; i < f.length; i++) {
-    //            formData.append("p", cf[i])
-    //            formData.append("f", f[i]);
-    //        }
-
-    //        const response = await fetch('api/GreenWellFiles/AddAFile', {
-    //            method: 'POST',
-    //            //headers: {
-    //            //    'Accept': 'application/json',
-    //            //    'Content-Type': 'application/json',
-    //            //},
-    //            body: formData
-    //        });
-    //        const json = await response.json();
-    //        if (json.status === "200") {
-    //            this.setState(state => {
-    //                const newFiles = files.map((file) => {
-    //                    let newKey = prefix
-    //                    if (prefix !== '' && prefix.substring(prefix.length - 1, prefix.length) !== '/') {
-    //                        newKey += '/'
-    //                    }
-    //                    newKey += file.name
-    //                    return {
-    //                        key: newKey
-    //                    }
-    //                })
-
-    //                const uniqueNewFiles = []
-    //                newFiles.map((newFile) => {
-    //                    let exists = false
-    //                    state.files.map((existingFile) => {
-    //                        if (existingFile.key === newFile.key) {
-    //                            exists = true
-    //                        }
-    //                    })
-    //                    if (!exists) {
-    //                        uniqueNewFiles.push(newFile)
-    //                    }
-    //                })
-    //                state.files = state.files.concat(uniqueNewFiles)
-    //                return state
-    //            })
-    //            alert(json.message);
-    //        }
-    //        else alert(json.message);
-    //    }
-    //    // call it
-    //    addFile(p, p2);
-    //}
 
     handleDeleteFile = (fileKey) => {
         // store path for file to be deleted
@@ -380,6 +298,8 @@ export class Home extends Component {
                         }
                     })
                     state.files = newFiles
+                    //If the file is deleted it can no longer be selected.
+                    state.downloadFileName = ""
                     return state
                 })
                 alert(json.message);
@@ -496,7 +416,6 @@ export class Home extends Component {
                 });
             }
             else if (json.status === "201") {
-                console.log(json);
                 this.setState({
                     showAlertModal: true,
                     showModal: false,
@@ -782,7 +701,7 @@ class GreenWellNavMenu extends Component {
         let search = async (p) => {
             let data = [p, this.state.searchBy, this.state.role];
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/Search', {
+            const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminSearch' : 'api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
