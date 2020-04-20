@@ -470,7 +470,12 @@ namespace Greenwell.Controllers
 
                 for (int i = 0; i < path.Count; i++)
                 {
-                    //remove paths
+                    //remove refrences in tagmap to prevent forign key error.
+                    int id = _context.Files.SingleOrDefault(a => a.FullPath == path[i].FullPath).FileId;
+                    _context.RemoveRange(_context.Tagmap.Where(a => a.FileId == id));
+                    await _context.SaveChangesAsync();
+
+                    //They remove the file.
                     _context.Files.Remove(path[i]);
                     await _context.SaveChangesAsync();
                 }
