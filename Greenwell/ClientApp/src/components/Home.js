@@ -46,14 +46,13 @@ export class Home extends Component {
         // check the state of the user and get the files
         this.populateState();
 
-    }
-
     //Create storage on constructor
     async createStorage() {
         const token = await authService.getAccessToken();
         fetch('api/GreenWellFiles/CreateLocalStorage', {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
+
     }
 
     // method that gets the state of the user and get the files accordingly
@@ -79,7 +78,9 @@ export class Home extends Component {
                 var t = [];
                 for (i = 0; i < json.files.length; i++) {
                     var r1 = {
-                        key: json.files[i]
+                        key: json.files[i],
+                        size: 1000,
+                        modified: +Moment(),
                     };
                     t.push(r1);
                 }
@@ -115,6 +116,7 @@ export class Home extends Component {
             uploadFilePath: selection.key,
             downloadFileName: ""
         });
+
     }
 
 
@@ -122,7 +124,7 @@ export class Home extends Component {
         // create object
         let formData = new FormData();
         formData.append("folderPath", key);
-        alert(key);
+        //alert(key);
         // define async function
         let createFolder = async () => {
             const token = await authService.getAccessToken();
@@ -135,7 +137,7 @@ export class Home extends Component {
             if (json.status === "200") {
                 this.setState(state => {
                     state.files = state.files.concat([{
-                        key: key
+                        key: key,
                     }])
                     return state
                 })
@@ -208,7 +210,6 @@ export class Home extends Component {
                             newFiles.push({
                                 ...file,
                                 key: file.key.replace(oldKey, newKey),
-                                modified: +Moment(),
                             })
                         } else {
                             newFiles.push(file)
@@ -252,6 +253,7 @@ export class Home extends Component {
                                 newFiles.push({
                                     ...file,
                                     key: newKey,
+                                    size: 1000,
                                     modified: +Moment(),
                                 })
                             } else {
@@ -365,6 +367,7 @@ export class Home extends Component {
 
             const token = await authService.getAccessToken();
             const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminAddFileFromUpload' : 'api/GreenWellFiles/AddFileFromUpload', {
+
                 method: 'POST',
                 body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
@@ -372,11 +375,16 @@ export class Home extends Component {
 
             const json = await response.json();
             if (json.status === "200") {
+
                 //We don't add the file to the browser if the user isn't an admin becuase it needs to be approved.
                 if (this.state.role == "Administrator") {
                     this.setState(state => {
                         const addedNewFile = [];
-                        addedNewFile.push({ key: this.state.uploadFilePath + this.state.uploadFileName });
+                        addedNewFile.push({ 
+                          key: this.state.uploadFilePath + this.state.uploadFileName,
+                          size: 1000,
+                          modified: +Moment(),
+                        });
 
                         const uniqueNewFiles = []
                         addedNewFile.map((newFile) => {
@@ -388,6 +396,7 @@ export class Home extends Component {
                             })
                             if (!exists) {
                                 uniqueNewFiles.push(newFile)
+
                             }
                         })
                         state.files = state.files.concat(uniqueNewFiles)
@@ -456,7 +465,9 @@ export class Home extends Component {
         var t = [];
         for (i = 0; i < fs.length; i++) {
             var r1 = {
-                key: fs[i]
+                key: fs[i],
+                size: 1000,
+                modified: +Moment(),
             };
             t.push(r1);
         }
@@ -476,7 +487,7 @@ export class Home extends Component {
         if (uploadFileName === "") {
             modalHeader = (
                 <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
-                    <Modal.Title>No File Selected.</Modal.Title>
+                    <Modal.Title>Upload A File.</Modal.Title>
                 </Modal.Header>
             );
             modalBody = (
@@ -537,6 +548,7 @@ export class Home extends Component {
                 onSelectFile={this.handleFileSelection}
                 onSelectFolder={this.handleFolderSelection}
 
+
             // onCreateFiles={this.handleCreateFiles}
 
             //onMoveFolder={this.handleRenameFolder}
@@ -564,6 +576,7 @@ export class Home extends Component {
                         onRenameFile={this.handleRenameFile}
                         onSelectFile={this.handleFileSelection}
                         onSelectFolder={this.handleFolderSelection}
+
 
                     // onCreateFiles={this.handleCreateFiles}
 
@@ -702,6 +715,7 @@ class GreenWellNavMenu extends Component {
             let data = [p, this.state.searchBy, this.state.role];
             const token = await authService.getAccessToken();
             const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminSearch' : 'api/GreenWellFiles/Search', {
+
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
