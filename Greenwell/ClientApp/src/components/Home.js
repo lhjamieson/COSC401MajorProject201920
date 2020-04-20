@@ -45,7 +45,7 @@ export class Home extends Component {
 
         // check the state of the user and get the files
         this.populateState();
-
+    }
     //Create storage on constructor
     async createStorage() {
         const token = await authService.getAccessToken();
