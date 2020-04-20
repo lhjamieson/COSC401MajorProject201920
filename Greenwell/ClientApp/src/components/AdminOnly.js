@@ -54,7 +54,6 @@ export class AdminOnly extends Component {
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
-            console.log(json);
             if (json.files.length == 0) {
                 this.setState({
                     files: [],
@@ -81,7 +80,6 @@ export class AdminOnly extends Component {
     resolveFile = async (fileToApprove, approval) => {
         const token = await authService.getAccessToken();
         let formData = new FormData();
-        console.log(typeof (fileToApprove));
         formData.append("fullPath", fileToApprove);
         formData.append("approval", approval);
         const response = await fetch('api/GreenWellFiles/ResolveApproval', {
