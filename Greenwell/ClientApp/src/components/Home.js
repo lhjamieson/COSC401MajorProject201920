@@ -31,7 +31,8 @@ export class Home extends Component {
             tagsForFileUpload: [],
             changeModalBody: false,
             tagsForFilter: [],
-
+            showAlertModal: false,
+            alertMessage: null,
             downloadFileName: "",
             uploading: false,
 
@@ -40,11 +41,11 @@ export class Home extends Component {
         };
         // check and create the local storage
         this.createStorage();
-    
+
 
         // check the state of the user and get the files
         this.populateState();
-     
+
     }
 
     //Create storage on constructor
@@ -55,25 +56,12 @@ export class Home extends Component {
         });
     }
 
-    componentDidMount() {
-        // add window event when component mounts
-        document.addEventListener("click", this.clicked);        
-    }
-
-    componentWillUnmount() {
-        // remove window event when component will unmount
-        document.removeEventListener("click", this.clicked); 
-    }
-
     // method that gets the state of the user and get the files accordingly
     async populateState() {
         let getFiles = async (r) => {
-            let formData = new FormData();
-            formData.append("userIsAdmin", r);
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/GetAllFiles', {
+            const response = await fetch(r ? 'api/GreenWellFiles/AdminGetAllFiles' : 'api/GreenWellFiles/GetAllFiles', {
                 method: 'POST',
-                body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
             const json = await response.json();
@@ -109,138 +97,26 @@ export class Home extends Component {
         const [user] = await Promise.all([authService.getUser()]);
         this.setState({
             role: user && user.role
-        }, () => getFiles(this.state.role));
-
-        //if (this.state.role != null) {
-        //    if (this.state.role == "Administrator") {
-        //        alert(this.state.role);
-        //    }
-        //}
+        }, () => getFiles(this.state.role == "Administrator"));
     }
 
 
-
-    clicked = () => {
-        //alert("whole window clicked.");
-        //alert(this.state.uploadFilePath);
-        //alert(this.state.downloadFileName);
-        if (this.state.uploading) {
-            //alert("returning.");
-            return;
-        }
-        setTimeout(() => {
-            if ( (document.getElementsByClassName("folder selected")[0] == null &&
-                document.getElementsByClassName("file selected")[0] == null) ) {
-                //alert("clear path and name in whole window.");
-                    this.setState({
-                        uploadFilePath: "",
-                        downloadFileName: ""
-                    });
-            }
-            //alert("finished whole window method.");
-        }, 100);
+    //Function that handles when a file is clicked on within react file browser
+    handleFileSelection = (selection) => {
+        this.setState({
+            uploadFilePath: "",
+            downloadFileName: selection.key
+        });
     }
 
-    componentDidUpdate() {
-        if (document.getElementsByClassName("rendered-react-keyed-file-browser")[0] != null)
-            document.getElementsByClassName("rendered-react-keyed-file-browser")[0].addEventListener("click", this.handleClickWindow);
-    }
-    handleClickWindow = () => {
-        //this.clicked();
-        //alert("key file browser window clicked.");
-        //alert(this.state.uploadFilePath);
-        //alert(this.state.downloadFileName);
-        setTimeout(() => {  
-            let element = document.getElementsByClassName("folder selected")[0];
-            let element2 = document.getElementsByClassName("file selected")[0];
-            if (element != null) {
-                //let lowest = element.children[0].children[0].children[0].children[0].children[0].innerText;
-                let path = "";
-                let find = element;
-                let foundParent = false;
-                do {
-                    if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
-                        foundParent = true;
-                    }
-                    const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                    path = folderName + "/" + path;
-                    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                } while (find != null && find.className === "folder" && !foundParent)
-                this.setState({
-                    uploadFilePath: path,
-                    downloadFileName: ""
-                });
-            }
-            else if (element2 != null) {
-                let path = "";
-                let find = element2;
-                while (find != null && (find.className === "folder" || find.className === "file selected")) {
-                    let name;
-                    if (find.className === "folder") {
-                        name = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                    } else if (find.className === "file selected") {
-                        name = find.children[0].children[0].children[0].children[0].innerText;
-                    }
-                    path = name + "/" + path;
-                    if (find.children[0].children[0].style.paddingLeft === '0px') {
-                        break;
-                    }
-                    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                }
-                //do {
-                //    if (find != null && find.children[0].children[0].style.paddingLeft === '0px') {
-                //        foundParent = true;
-                //    }
-                //    const folderName = find.children[0].children[0].children[0].children[0].children[0].innerText;
-                //    console.log(folderName);
-                //    path = folderName + "/" + path;
-                //    find = find.parentElement.children[Array.from(find.parentElement.children).indexOf(find) - 1];
-                //} while (find != null && find.className === "folder" && !foundParent)
-                this.setState({
-                    //uploadFilePath: "",
-                    downloadFileName: path.substring(0,path.length - 1) 
-                });
-            }
-            //alert("finished key file browser method.");
-        }, 100);
+    //Function that handles when a folder is clicked on with react file browser
+    handleFolderSelection = (selection) => {
+        this.setState({
+            uploadFilePath: selection.key,
+            downloadFileName: ""
+        });
     }
 
-    //fetchPathFiles = (val) => {
-    //    this.setState({
-    //        loading: true
-    //    });
-    //    const pf = val;
-    //    let getFiles = async (p) => {
-    //        const response = await fetch('api/GreenWellFiles/GetFilesFromGivenPath', {
-    //            method: 'POST',
-    //            headers: {
-    //                'Accept': 'application/json',
-    //                'Content-Type': 'application/json',
-    //            },
-    //            body: JSON.stringify(p.toString())
-    //        });
-    //        const json = await response.json();
-    //        if (json.status === "200") {
-    //            var i;
-    //            var t = [];
-    //            for (i = 0; i < json.files.length; i++) {
-    //                var r1 = {
-    //                    key: json.files[i]
-    //                };
-    //                t.push(r1);
-    //            }
-    //            this.setState({
-    //                loading: false,
-    //                filesLoaded: true,
-    //                noFiles: false,
-    //                files: t
-    //            });
-    //            alert(json.message);
-    //        }
-    //        else alert(json.message);
-    //    }
-    //    getFiles(pf);
-    //}
 
     handleCreateFolder = (key) => {
         // create object
@@ -288,13 +164,15 @@ export class Home extends Component {
                 this.setState(state => {
                     const newFiles = []
                     state.files.map((file) => {
-                        if (file.key.substr(0, folderKey.length) !== folderKey) {
-                            newFiles.push(file)
+                        if (file.key.substr(0, folderKey.toString().length) != folderKey) {
+                            newFiles.push(file);
                         }
-                    })
-                    state.files = newFiles
+                    });
+                    //If a folder is deleted the upload path should reflect that.
+                    state.uploadFilePath = "";
+                    state.files = newFiles;
                     return state
-                })
+                });
                 alert(json.message);
             }
             else alert(json.message);
@@ -305,6 +183,9 @@ export class Home extends Component {
 
     handleRenameFolder = (oldKey, newKey) => {
         // store old and new folder names
+        if (oldKey.charAt(0) == "/") {
+            oldKey = oldKey.substring(1, oldKey.length);
+        }
         const rf = [oldKey, newKey]
         // create async function
         let renameFolder = async (p) => {
@@ -333,6 +214,8 @@ export class Home extends Component {
                             newFiles.push(file)
                         }
                     })
+                    //If the folder is renamed, the uploadPath should reflect that.
+                    state.uploadFilePath = newKey
                     state.files = newFiles
                     return state
                 })
@@ -375,7 +258,9 @@ export class Home extends Component {
                                 newFiles.push(file)
                             }
                         })
-                        state.files = newFiles
+                        state.files = newFiles;
+                        //If the file name is altered, our selection should reflect that.
+                        state.downloadFileName = newKey;
                         return state
                     })
                 })
@@ -387,89 +272,6 @@ export class Home extends Component {
         renameFile(rf);
     }
 
-    //handleCreateFiles = (files, prefix) => {
-    //    //console.log(files);
-    //    if (files == "" & prefix == "") {
-    //        alert("ok");
-    //        files = [this.state.uploadFile];
-    //        prefix = this.state.uploadFilePath;
-    //        alert(prefix);
-    //    }
-    //    // get the file/files full path
-    //    // put file/files string path/s in array
-    //    var fi;
-    //    let res = files.map((f) => {
-    //        fi = f;
-    //        return f.name
-    //    });
-    //    let p = [];
-    //    let p2 = []
-    //    if (files.length > 1) {
-    //        res = res.toString().split(",");
-    //        var i;
-    //        for (i = 0; i < res.length; i++) {
-    //            res[i] = prefix + res[i];
-    //            p2.push(files[i]);
-    //        }
-    //        p = [...res];
-    //    }
-    //    else {
-    //        res = prefix + res;
-    //        p = [res];
-    //        p2 = [fi];
-    //    }
-    //    // create async function
-    //    let addFile = async (cf, f) => {
-    //        let formData = new FormData();
-    //        for (let i = 0; i < f.length; i++) {
-    //            formData.append("p", cf[i])
-    //            formData.append("f", f[i]);
-    //        }
-
-    //        const response = await fetch('api/GreenWellFiles/AddAFile', {
-    //            method: 'POST',
-    //            //headers: {
-    //            //    'Accept': 'application/json',
-    //            //    'Content-Type': 'application/json',
-    //            //},
-    //            body: formData
-    //        });
-    //        const json = await response.json();
-    //        if (json.status === "200") {
-    //            this.setState(state => {
-    //                const newFiles = files.map((file) => {
-    //                    let newKey = prefix
-    //                    if (prefix !== '' && prefix.substring(prefix.length - 1, prefix.length) !== '/') {
-    //                        newKey += '/'
-    //                    }
-    //                    newKey += file.name
-    //                    return {
-    //                        key: newKey
-    //                    }
-    //                })
-
-    //                const uniqueNewFiles = []
-    //                newFiles.map((newFile) => {
-    //                    let exists = false
-    //                    state.files.map((existingFile) => {
-    //                        if (existingFile.key === newFile.key) {
-    //                            exists = true
-    //                        }
-    //                    })
-    //                    if (!exists) {
-    //                        uniqueNewFiles.push(newFile)
-    //                    }
-    //                })
-    //                state.files = state.files.concat(uniqueNewFiles)
-    //                return state
-    //            })
-    //            alert(json.message);
-    //        }
-    //        else alert(json.message);
-    //    }
-    //    // call it
-    //    addFile(p, p2);
-    //}
 
     handleDeleteFile = (fileKey) => {
         // store path for file to be deleted
@@ -482,7 +284,7 @@ export class Home extends Component {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(p)
             })
@@ -496,6 +298,8 @@ export class Home extends Component {
                         }
                     })
                     state.files = newFiles
+                    //If the file is deleted it can no longer be selected.
+                    state.downloadFileName = ""
                     return state
                 })
                 alert(json.message);
@@ -547,6 +351,7 @@ export class Home extends Component {
                     tags.push(this.state.tagsForFileUpload[i]);
             }
         }
+
         let fullPath = this.state.uploadFilePath + this.state.uploadFileName;
         let addFile = async () => {
             let formData = new FormData();
@@ -557,34 +362,51 @@ export class Home extends Component {
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
             else
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox").checked);
+
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/AddFileFromUpload', {
+            const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminAddFileFromUpload' : 'api/GreenWellFiles/AddFileFromUpload', {
                 method: 'POST',
                 body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
+
             const json = await response.json();
             if (json.status === "200") {
-                this.setState(state => {
+                //We don't add the file to the browser if the user isn't an admin becuase it needs to be approved.
+                if (this.state.role == "Administrator") {
+                    this.setState(state => {
+                        const addedNewFile = [];
+                        addedNewFile.push({ key: this.state.uploadFilePath + this.state.uploadFileName });
 
-                    const addedNewFile = [];
-                    addedNewFile.push({ key: this.state.uploadFilePath + "/" + this.state.uploadFileName });
-
-                    const uniqueNewFiles = []
-                    addedNewFile.map((newFile) => {
-                        let exists = false
-                        state.files.map((existingFile) => {
-                            if (existingFile.key === newFile.key) {
-                                exists = true
+                        const uniqueNewFiles = []
+                        addedNewFile.map((newFile) => {
+                            let exists = false
+                            state.files.map((existingFile) => {
+                                if (existingFile.key === newFile.key) {
+                                    exists = true
+                                }
+                            })
+                            if (!exists) {
+                                uniqueNewFiles.push(newFile)
                             }
                         })
-                        if (!exists) {
-                            uniqueNewFiles.push(newFile)
-                        }
+                        state.files = state.files.concat(uniqueNewFiles)
+                        return state
+
+                    });
+                }
+                else {
+                    this.setState({
+                        showAlertModal: true,
+                        showModal: false,
+                        uploadFile: null,
+                        uploadFileName: "",
+                        uploadFilePath: "",
+                        uploading: false,
+                        alertMessage: "File has been sent for approval."
                     })
-                    state.files = state.files.concat(uniqueNewFiles)
-                    return state
-                })
+                    return
+                }
                 this.setState({
                     showModal: false,
                     uploadFile: null,
@@ -592,6 +414,17 @@ export class Home extends Component {
                     uploadFilePath: "",
                     uploading: false
                 });
+            }
+            else if (json.status === "201") {
+                this.setState({
+                    showAlertModal: true,
+                    showModal: false,
+                    uploadFile: null,
+                    uploadFileName: "",
+                    uploadFilePath: "",
+                    uploading: false,
+                    alertMessage: "Unable to upload duplicate file."
+                })
             }
         }
         addFile();
@@ -687,27 +520,28 @@ export class Home extends Component {
         let adminFileCheck = null;
         let deletePermission = (
             <FileBrowser /*className="react-keyed-file-browser"*/
-            files={this.state.files}
-            icons={{
-                File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
-                Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
-                PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
-                Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
-                Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
-                FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
-                Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
-                Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
-            }}
-            onCreateFolder={this.handleCreateFolder}
-            onRenameFolder={this.handleRenameFolder}
-            onRenameFile={this.handleRenameFile}
+                files={this.state.files}
+                icons={{
+                    File: <FontAwesomeIcon className="fa-2x" icon={faFile} />,
+                    Image: <FontAwesomeIcon className="fa-2x" icon={faImage} />,
+                    PDF: <FontAwesomeIcon className="fa-2x" icon={faFilePdf} />,
+                    Rename: <FontAwesomeIcon className="fa-2x" icon={faFileSignature} />,
+                    Folder: <FontAwesomeIcon className="fa-2x" icon={faFolder} />,
+                    FolderOpen: <FontAwesomeIcon className="fa-2x" icon={faFolderOpen} />,
+                    Delete: <FontAwesomeIcon className="fa-2x" icon={faTrash} />,
+                    Loading: <FontAwesomeIcon className="fa-2x" icon={faSpinner} />,
+                }}
+                onCreateFolder={this.handleCreateFolder}
+                onRenameFolder={this.handleRenameFolder}
+                onRenameFile={this.handleRenameFile}
+                onSelectFile={this.handleFileSelection}
+                onSelectFolder={this.handleFolderSelection}
 
+            // onCreateFiles={this.handleCreateFiles}
 
-        // onCreateFiles={this.handleCreateFiles}
-
-        //onMoveFolder={this.handleRenameFolder}
-        //onMoveFile={this.handleRenameFolder}
-        />);
+            //onMoveFolder={this.handleRenameFolder}
+            //onMoveFile={this.handleRenameFolder}
+            />);
         if (this.state.role != null) {
             if (this.state.role == "Administrator") {
                 deletePermission = (
@@ -728,14 +562,15 @@ export class Home extends Component {
                         onCreateFolder={this.handleCreateFolder}
                         onRenameFolder={this.handleRenameFolder}
                         onRenameFile={this.handleRenameFile}
-
+                        onSelectFile={this.handleFileSelection}
+                        onSelectFolder={this.handleFolderSelection}
 
                     // onCreateFiles={this.handleCreateFiles}
 
                     //onMoveFolder={this.handleRenameFolder}
                     //onMoveFile={this.handleRenameFolder}
                     />
-                    );
+                );
 
                 if (uploadFileName !== "") {
                     adminFileCheck = (
@@ -765,9 +600,9 @@ export class Home extends Component {
         if (this.state.downloadFileName.trim() === "") {
             download = (
                 <div style={{ textAlign: "right" }}>
-                    <Button style={{cursor: "default", backgroundColor: "gray"}}>Download</Button>
+                    <Button style={{ cursor: "default", backgroundColor: "gray" }}>Download</Button>
                 </div>
-                );
+            );
         }
         //    if (noFiles && !loading) {
         //        content =
@@ -790,36 +625,47 @@ export class Home extends Component {
             content =
                 (
                     <React.Fragment>
-                    <div id="file_browser" className="div-files">
-                        {deletePermission}
-                    </div>
-                    {download}
+                        <div id="file_browser" className="div-files">
+                            {deletePermission}
+                        </div>
+                        {download}
                         <Modal show={this.state.showModal} onHide={this.handleModalClose}>
                             {modalHeader}
                             {modalBody}
-                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
 
-                            <Container>
-                                <Row>
-                                    <Col style={{ width: "100%", textAlign: "center" }}>
-                                        {adminFileCheck}
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col style={{width: "50%", textAlign: "center"}}>
-                                        <Button variant="secondary" onClick={this.handleModalClose}>
-                                            Close
+                                <Container>
+                                    <Row>
+                                        <Col style={{ width: "100%", textAlign: "center" }}>
+                                            {adminFileCheck}
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            <Button variant="secondary" onClick={this.handleModalClose}>
+                                                Close
                                         </Button>
-                                    </Col>
-                                    <Col style={{ width: "50%", textAlign: "center" }}>
-                                        {browseOrUpload}
-                                    </Col>
-                                </Row>
-                            </Container>
+                                        </Col>
+                                        <Col style={{ width: "50%", textAlign: "center" }}>
+                                            {browseOrUpload}
+                                        </Col>
+                                    </Row>
+                                </Container>
                                 <Form.Control id="dialog" onChange={this.handleSelectedFiles} type="file"></Form.Control>
                             </Modal.Footer>
                         </Modal>
                         <Footer handleModalShow={this.handleModalShow} />
+
+                        <Modal centered show={this.state.showAlertModal} onEnter={() => { document.getElementById("alert").innerHTML = this.state.alertMessage }} onHide={() => this.setState({ showAlertModal: false, alertMesssage: null })}>
+                            <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                                <p id="alert"></p>
+                            </Modal.Body>
+                            <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                                <Button onClick={() => { this.setState({ showAlertModal: false, alertMesssage: null }) }} variant="primary">Ok</Button>
+                            </Modal.Footer>
+                        </Modal>
+
+
                     </React.Fragment>
                 );
         }
@@ -855,7 +701,7 @@ class GreenWellNavMenu extends Component {
         let search = async (p) => {
             let data = [p, this.state.searchBy, this.state.role];
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/Search', {
+            const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminSearch' : 'api/GreenWellFiles/Search', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
