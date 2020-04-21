@@ -756,7 +756,7 @@ class GreenWellNavMenu extends Component {
                         </Dropdown.Menu>
                     </Dropdown>
                     <Form inline>
-                        <FormControl id="search" onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white" }} type="text" placeholder="Search" />
+                        <FormControl id="search" onKeyPress={event => { if (event.key === "Enter") { event.preventDefault(); }}} onChange={() => this.Search(document.getElementById("search").value)} style={{ height: "45px", backgroundColor: "transparent", border: "2px solid white" }} type="text" placeholder="Search" />
                         <Button onClick={() => this.Search(document.getElementById("search").value)} className="search-button">
                             <Image src={searchButton} />
                         </Button>
