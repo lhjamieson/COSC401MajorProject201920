@@ -25,6 +25,8 @@ export class AdminOnly extends Component {
             userInAction: null,
             files: [],
             fileSelected: null,
+            showAlertModal: false,
+            alertMessage: ""
         }
 
 
@@ -77,6 +79,13 @@ export class AdminOnly extends Component {
         getUnapprovedFiles();
     }
 
+    showAlertModal = (message) => {
+        this.setState({
+            showAlertModal: true,
+            alertMessage: message
+        })
+    }
+
     resolveFile = async (fileToApprove, approval) => {
         const token = await authService.getAccessToken();
         let formData = new FormData();
@@ -88,19 +97,27 @@ export class AdminOnly extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
         const json = await response.json();
-
-        this.setState(state => {
-            let newFiles = []
-            state.files.map((file) => {
-                if (file.key.fullPath !== fileToApprove) {
-                    newFiles.push(file)
-                }
+        if (response.ok) {
+            this.setState(state => {
+                let newFiles = []
+                state.files.map((file) => {
+                    if (file.key.fullPath !== fileToApprove) {
+                        newFiles.push(file)
+                    }
+                })
+                state.files = newFiles;
+                state.showApproveModal = false;
+                state.showRejectModal = false;
+                return state
             })
-            state.files = newFiles;
-            state.showApproveModal = false;
-            state.showRejectModal = false;
-            return state
-        })
+        }
+        else {
+            this.setState({
+                showApproveModal: false,
+                showRejectModal: false,
+            })
+            this.showAlertModal(json.message);
+        }
     };
 
     downloadFile = async (fileToDownload) => {
@@ -131,12 +148,21 @@ export class AdminOnly extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
         const json = await response.json();
-        this.setState({
-            adminUsers: json.adminUsers,
-            nonAdminUsers: json.nonAdminUsers,
-            showDeleteUserModal: false,
-            userInAction: null
-        });
+        if (response.ok) {
+            this.setState({
+                adminUsers: json.adminUsers,
+                nonAdminUsers: json.nonAdminUsers,
+                showDeleteUserModal: false,
+                userInAction: null
+            });
+        }
+        else {
+            this.setState({
+                showDeleteUserModal: false,
+                userInAction: null
+            });
+            this.showAlertModal(json.message);
+        }
     };
 
     makeUserAdmin = async (userToMakeAdmin) => {
@@ -151,12 +177,21 @@ export class AdminOnly extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
         const json = await response.json();
-        this.setState({
-            adminUsers: json.adminUsers,
-            nonAdminUsers: json.nonAdminUsers,
-            showMakeUserAdminModal: false,
-            userInAction: null
-        });
+        if (response.ok) {
+            this.setState({
+                adminUsers: json.adminUsers,
+                nonAdminUsers: json.nonAdminUsers,
+                showMakeUserAdminModal: false,
+                userInAction: null
+            });
+        }
+        else {
+            this.setState({
+                showMakeUserAdminModal: false,
+                userInAction: null
+            });
+           this.showAlertModal(json.message);
+        }
     };
 
     makeUserNonAdmin = async (userToMakeNonAdmin) => {
@@ -171,12 +206,21 @@ export class AdminOnly extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
         const json = await response.json();
-        this.setState({
-            adminUsers: json.adminUsers,
-            nonAdminUsers: json.nonAdminUsers,
-            showMakeAdminNonAdminModal: false,
-            userInAction: null
-        });
+        if (response.ok) {
+            this.setState({
+                adminUsers: json.adminUsers,
+                nonAdminUsers: json.nonAdminUsers,
+                showMakeAdminNonAdminModal: false,
+                userInAction: null
+            });
+        }
+        else {
+            this.setState({
+                showMakeAdminNonAdminModal: false,
+                userInAction: null
+            });
+            this.showAlertModal(json.message);
+        }
     };
 
     validateEmail = (email) => {
@@ -205,12 +249,21 @@ export class AdminOnly extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         });
         const json = await response.json();
-        this.setState({
-            adminUsers: json.adminUsers,
-            nonAdminUsers: json.nonAdminUsers,
-            showMakeAdminNonAdminModal: false,
-            userInAction: null
-        });
+        if (response.ok) {
+            this.setState({
+                adminUsers: json.adminUsers,
+                nonAdminUsers: json.nonAdminUsers,
+                showMakeAdminNonAdminModal: false,
+                userInAction: null
+            });
+        }
+        else {
+            this.setState({
+                showMakeAdminNonAdminModal: false,
+                userInAction: null
+            });
+            this.showAlertModal(json.message);
+        }
     };
 
     render() {
@@ -223,6 +276,15 @@ export class AdminOnly extends Component {
         if (!this.state.loading) {
             content = (
                 <React.Fragment>
+                    <Modal centered show={this.state.showAlertModal} onEnter={() => { document.getElementById("alert").innerHTML = this.state.alertMessage }} onHide={() => this.setState({ showAlertModal: false, alertMesssage: null })}>
+                        <Modal.Body style={{ backgroundColor: "whiteSmoke" }}>
+                            <p id="alert"></p>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "whiteSmoke" }}>
+                            <Button onClick={() => { this.setState({ showAlertModal: false, alertMesssage: null }) }} variant="primary">Ok</Button>
+                        </Modal.Footer>
+                    </Modal>
+
                     <Modal show={this.state.showDeleteUserModal} onHide={() => this.setState({ showDeleteUserModal: false, userInAction: null })}>
                         <Modal.Header style={{ backgroundColor: "whiteSmoke" }} closeButton>
                             <Modal.Title>Confirm</Modal.Title>

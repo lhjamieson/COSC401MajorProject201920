@@ -141,9 +141,10 @@ export class Home extends Component {
                     }])
                     return state
                 })
-                alert(json.message);
             }
-            else alert(json.message);
+            else {
+                this.showAlertModal(json.message);
+            }
         }
         // call it
         createFolder();
@@ -175,9 +176,10 @@ export class Home extends Component {
                     state.files = newFiles;
                     return state
                 });
-                alert(json.message);
             }
-            else alert(json.message);
+            else {
+                this.showAlertModal(json.message);
+            }
         }
         // call it
         deleteFolder();
@@ -188,6 +190,12 @@ export class Home extends Component {
         if (oldKey.charAt(0) == "/") {
             oldKey = oldKey.substring(1, oldKey.length);
         }
+
+        //If the user didn't rename the holder, we don't call the method.
+        if (oldKey === newKey) {
+            return
+        }
+
         const rf = [oldKey, newKey]
         // create async function
         let renameFolder = async (p) => {
@@ -220,9 +228,11 @@ export class Home extends Component {
                     state.files = newFiles
                     return state
                 })
-                alert(json.message);
             }
-            else alert(json.message);
+            else {
+                this.showAlertModal(json.message);
+            }
+
         }
         // call it
         renameFolder(rf);
@@ -231,6 +241,12 @@ export class Home extends Component {
     handleRenameFile = (oldKey, newKey) => {
         // store old and new file names
         const rf = [oldKey, newKey]
+
+        //If the old name and the new name are the same, we don't call the method
+        if (oldKey === newKey) {
+            return
+        }
+
         // create async function
         let renameFile = async (p) => {
             const token = await authService.getAccessToken();
@@ -248,6 +264,7 @@ export class Home extends Component {
                 this.setState(state => {
                     this.setState(state => {
                         const newFiles = []
+                        //Add all the new files to teh file browser
                         state.files.map((file) => {
                             if (file.key === oldKey) {
                                 newFiles.push({
@@ -266,9 +283,10 @@ export class Home extends Component {
                         return state
                     })
                 })
-                alert(json.message);
             }
-            else alert(json.message);
+            else {
+                this.showAlertModal(json.message);
+            }
         }
         // call it
         renameFile(rf);
@@ -304,9 +322,10 @@ export class Home extends Component {
                     state.downloadFileName = ""
                     return state
                 })
-                alert(json.message);
             }
-            else alert(json.message);
+            else {
+                this.showAlertModal(json.message);
+            }
         }
         // call it
         deleteFile(df);
@@ -321,6 +340,13 @@ export class Home extends Component {
             uploading: false
         });
     }
+
+    showAlertModal = (message) => {
+        this.setState({
+            showAlertModal: true,
+            alertMessage: message
+        })
+    } 
 
     handleModalShow = () => {
         this.setState({
@@ -374,9 +400,9 @@ export class Home extends Component {
             });
 
             const json = await response.json();
+            //Even if successful, we don't add the file to the browser if the user isn't an admin because it needs to be approved if they aren't an Administrator.
             if (json.status === "200") {
-
-                //We don't add the file to the browser if the user isn't an admin becuase it needs to be approved.
+                //If they are an Administrator we add the uploaded file to the file browser
                 if (this.state.role == "Administrator") {
                     this.setState(state => {
                         const addedNewFile = [];
@@ -403,37 +429,36 @@ export class Home extends Component {
                         return state
 
                     });
+                    //Hide the upload modal
+                    this.setState({
+                        showModal: false,
+                        uploadFile: null,
+                        uploadFileName: "",
+                        uploadFilePath: "",
+                        uploading: false
+                    });
                 }
+                //Otherwise we close the modal and tell the user the file has been sent to upload.
                 else {
                     this.setState({
-                        showAlertModal: true,
                         showModal: false,
                         uploadFile: null,
                         uploadFileName: "",
                         uploadFilePath: "",
                         uploading: false,
-                        alertMessage: "File has been sent for approval."
                     })
-                    return
+                    this.showAlertModal("File has been sent for approval");
                 }
-                this.setState({
-                    showModal: false,
-                    uploadFile: null,
-                    uploadFileName: "",
-                    uploadFilePath: "",
-                    uploading: false
-                });
             }
             else if (json.status === "201") {
                 this.setState({
-                    showAlertModal: true,
                     showModal: false,
                     uploadFile: null,
                     uploadFileName: "",
                     uploadFilePath: "",
                     uploading: false,
-                    alertMessage: "Unable to upload duplicate file."
-                })
+                });
+                this.showAlertModal("Unable to upload duplicate files.");
             }
         }
         addFile();

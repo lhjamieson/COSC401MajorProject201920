@@ -46,131 +46,163 @@ namespace Greenwell.Controllers
         [HttpPost("DeleteUser")]
         public async Task<IActionResult> DeleteUser([FromForm] string currentUser, [FromForm] string userToDelete)
         {
-            var passedUser = await userManager.FindByEmailAsync(userToDelete.ToString());
+            try
+            {
+                var passedUser = await userManager.FindByEmailAsync(userToDelete.ToString());
 
-            // delete the user
-            await userManager.DeleteAsync(passedUser);
+                // delete the user
+                await userManager.DeleteAsync(passedUser);
 
-            // post delete
-            // get all admin users
-            var admins = await userManager.GetUsersInRoleAsync("Administrator");
-            // exclude current admin user
-            var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-            // get all non admin users
-            var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                // post delete
+                // get all admin users
+                var admins = await userManager.GetUsersInRoleAsync("Administrator");
+                // exclude current admin user
+                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
+                // get all non admin users
+                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
 
-            return Ok(new { adminUsers, nonAdminUsers });
+                return Ok(new { adminUsers, nonAdminUsers });
+            }
+            catch (Exception e) {
+                return StatusCode(500, new {message = "Couldn't delete user.", error = e.Message, status = "500" });
+            }
         }
 
         [HttpPost("MakeUserAdmin")]
         public async Task<IActionResult> MakeUserAdmin([FromForm] string currentUser, [FromForm] string userToMakeAdmin)
         {
-            var passedUser = await userManager.FindByEmailAsync(userToMakeAdmin.ToString());
+            try
+            {
 
-            // make non-admin user admin
-            await userManager.RemoveFromRoleAsync(passedUser, "Member");
-            await userManager.AddToRoleAsync(passedUser, "Administrator");
+                var passedUser = await userManager.FindByEmailAsync(userToMakeAdmin.ToString());
 
-            // post making user admin
-            // get all admin users
-            var admins = await userManager.GetUsersInRoleAsync("Administrator");
-            // exclude current admin user
-            var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-            // get all non admin users
-            var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                // make non-admin user admin
+                await userManager.RemoveFromRoleAsync(passedUser, "Member");
+                await userManager.AddToRoleAsync(passedUser, "Administrator");
 
-            return Ok(new { adminUsers, nonAdminUsers });
+                // post making user admin
+                // get all admin users
+                var admins = await userManager.GetUsersInRoleAsync("Administrator");
+                // exclude current admin user
+                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
+                // get all non admin users
+                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+
+                return Ok(new { adminUsers, nonAdminUsers });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new { message = "Couldn't make user admin.", error = e.Message, status = "500" });
+            }
         }
 
         [HttpPost("MakeUserNonAdmin")]
         public async Task<IActionResult> MakeUserNonAdmin([FromForm] string currentUser, [FromForm] string userToMakeNonAdmin)
         {
-            var passedUser = await userManager.FindByEmailAsync(userToMakeNonAdmin.ToString());
+            try
+            {
+                var passedUser = await userManager.FindByEmailAsync(userToMakeNonAdmin.ToString());
 
-            // make non-admin user admin
-            await userManager.RemoveFromRoleAsync(passedUser, "Administrator");
-            await userManager.AddToRoleAsync(passedUser, "Member");
+                // make non-admin user admin
+                await userManager.RemoveFromRoleAsync(passedUser, "Administrator");
+                await userManager.AddToRoleAsync(passedUser, "Member");
 
-            // post making user admin
-            // get all admin users
-            var admins = await userManager.GetUsersInRoleAsync("Administrator");
-            // exclude current admin user
-            var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-            // get all non admin users
-            var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                // post making user admin
+                // get all admin users
+                var admins = await userManager.GetUsersInRoleAsync("Administrator");
+                // exclude current admin user
+                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
+                // get all non admin users
+                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
 
-            return Ok(new { adminUsers, nonAdminUsers });
+                return Ok(new { adminUsers, nonAdminUsers });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new { message = "Couldn't remove user's admin status.", error = e.Message, status = "500" });
+            }
         }
 
         [HttpPost("AddUser")]
         public async Task<IActionResult> AddUser([FromForm] string currentUser, [FromForm] string userEmail, [FromForm] string userName)
         {
-            Debug.WriteLine("Add User Request From " + userEmail);
 
-            //We check if the intended user already exists.
-            Task<ApplicationUser> checkAppUser = userManager.FindByEmailAsync(userEmail);
-            checkAppUser.Wait();
-            ApplicationUser appUser = checkAppUser.Result;
-
-
-            //If they already exist we do nothing.
-            if (appUser == null)
+            try
             {
-                //We create a user with their properties
-                ApplicationUser newAppUser = new ApplicationUser
+                //We check if the intended user already exists.
+                Task<ApplicationUser> checkAppUser = userManager.FindByEmailAsync(userEmail);
+                checkAppUser.Wait();
+                ApplicationUser appUser = checkAppUser.Result;
+
+
+                //If they already exist we do nothing.
+                if (appUser == null)
                 {
-                    Email = userEmail,
-                    UserName = userName,
-                    //We confirm their email so that they can reset their password even if the haven't expressly confirmed their email.
-                    EmailConfirmed = true
-                };
+                    //We create a user with their properties
+                    ApplicationUser newAppUser = new ApplicationUser
+                    {
+                        Email = userEmail,
+                        UserName = userName,
+                        //We confirm their email so that they can reset their password even if the haven't expressly confirmed their email.
+                        EmailConfirmed = true
+                    };
 
-                //We generate a default password.
-                string userpass = GeneratePassword();
+                    //We generate a default password.
+                    string userpass = GeneratePassword();
 
-                //We then generate the user so that we can send them an email to setup their account.
-                Task<IdentityResult> taskCreateAppUser = userManager.CreateAsync(newAppUser, userpass);
+                    //We then generate the user so that we can send them an email to setup their account.
+                    Task<IdentityResult> taskCreateAppUser = userManager.CreateAsync(newAppUser, userpass);
 
 
-                //We check if the user was successfully created.
-                if (taskCreateAppUser.Result.Succeeded)
-                {
-                    appUser = newAppUser;
+                    //We check if the user was successfully created.
+                    if (taskCreateAppUser.Result.Succeeded)
+                    {
+                        appUser = newAppUser;
+                    }
+                    else
+                    {
+                        return StatusCode(500, new { message = "Couldn't add user.", error = taskCreateAppUser.Result.Errors, status = "500" });
+                    }
+
+
+                    //We add the user to the role, regardless if they existed before or not.
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, "Member");
+                    newUserRole.Wait();
+
+                    //Finally we send the user a email to setup their account which is just a modified password reset.
+                    var code = await userManager.GeneratePasswordResetTokenAsync(appUser);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = Url.Page(
+                        "/Account/SetupAccount",
+                        pageHandler: null,
+                        values: new { area = "Identity", code },
+                        protocol: Request.Scheme);
+
+                    await emailSender.SendEmailAsync(
+                        userEmail,
+                        "Setup Your Greenwell Account",
+                        $"You have been invited to create a Greenwell State Park Account. Please finish setting up account by creating a password <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>. You must finish setting up your account within 14 days.");
+                    Debug.WriteLine(callbackUrl);
                 }
-                else { 
-                 //Return user cannot be created error.
+                else {
+                    return StatusCode(500, new { message = "Can't add a user that already exists.", status = "500" });
                 }
 
+                //Return a updated list of users.
+                // get all admin users
+                var admins = await userManager.GetUsersInRoleAsync("Administrator");
+                // exclude current admin user
+                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
+                // get all non admin users
+                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
 
-                //We add the user to the role, regardless if they existed before or not.
-                Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, "Member");
-                newUserRole.Wait();
+                return Ok(new { adminUsers, nonAdminUsers });
 
-                //Finally we send the user a email to setup their account which is just a modified password reset.
-                var code = await userManager.GeneratePasswordResetTokenAsync(appUser);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/SetupAccount",
-                    pageHandler: null,
-                    values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
-
-                await emailSender.SendEmailAsync(
-                    userEmail,
-                    "Setup Your Greenwell Account",
-                    $"You have been invited to create a Greenwell State Park Account. Please finish setting up account by creating a password <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>. You must finish setting up your account within 14 days.");
-                Debug.WriteLine(callbackUrl);     
             }
-
-            //Return a updated list of users.
-            // get all admin users
-            var admins = await userManager.GetUsersInRoleAsync("Administrator");
-            // exclude current admin user
-            var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-            // get all non admin users
-            var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
-
-            return Ok(new { adminUsers, nonAdminUsers });
+            catch (Exception e)
+            {
+                return StatusCode(500, new { message = "Couldn't add user.", error = e.Message, status = "500" });
+            }
         }
 
         //Function that generates the temporary password for the created user. It derives all requirements from the userManager.

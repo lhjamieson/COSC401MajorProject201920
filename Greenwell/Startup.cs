@@ -136,7 +136,7 @@ namespace Greenwell
             CreateRolesAndAdminUser(serviceProvider);
         }
 
-        //This methods creates all the roles and assigns a admin user so there is always a hardcoded admin user.
+        //This methods creates all the roles and assigns a admin user so there is always a hard coded admin user.
         private static void CreateRolesAndAdminUser(IServiceProvider serviceProvider)
         {
             const string adminRoleName = "Administrator";
@@ -169,7 +169,7 @@ namespace Greenwell
             Task<bool> roleExists = roleManager.RoleExistsAsync(roleName);
             roleExists.Wait();
 
-            //If the role doesnt exist we add it
+            //If the role doesn't exist we add it
             if (!roleExists.Result)
             {
                 Task<IdentityResult> roleResult = roleManager.CreateAsync(new IdentityRole(roleName));
@@ -200,7 +200,7 @@ namespace Greenwell
                 {
                     Email = userEmail,
                     UserName = userName,
-                    //Because we are only calling this on a demo user, we need just pretened the email has been confirmed, in the future,
+                    //Because we are only calling this on default setup user, we need just pretend the email has been confirmed, in the future,
                     EmailConfirmed = true
                 };
 
@@ -214,13 +214,6 @@ namespace Greenwell
                 }
             }
 
-            //This crappy code fixes a problem I introduced earlier, it's only needed if people's admin accounts were created before the fix.
-            //It will not be in the final code.
-            if (appUser.Email == "admin@test.com") {
-                appUser.EmailConfirmed = true;
-                userManager.UpdateAsync(appUser).Wait();
-                
-            }
 
             //Finally we add the user to the role, regardless if they existed before or not.
             Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(appUser, roleName);

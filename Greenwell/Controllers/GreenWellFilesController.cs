@@ -625,7 +625,7 @@ namespace Greenwell.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, new { message = "File could not be deleted.", error = e.Message, status = "500" });
+                return StatusCode(500, new { message = "File could not be found.", error = e.Message, status = "500" });
             }
         }
         }
