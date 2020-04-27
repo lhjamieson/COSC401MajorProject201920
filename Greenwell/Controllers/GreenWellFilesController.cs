@@ -578,6 +578,20 @@ namespace Greenwell.Controllers
         [HttpPost("DownloadAFile")]
         public IActionResult DownloadFile([FromForm] string filePath)
         {
+            var file = _context.Files.SingleOrDefault(a => a.FullPath == filePath);
+
+            //We check to see if the files exists in the database so they download corrupted, non-existent files.
+            if (file == null)
+            {
+                return StatusCode(500, new { message = "File could not be found.", status = "403" });
+            }
+            //We then check to see if the file is AdminOnly or requires approval, they shouldn't be able to even download files that fail this check, but someone could call this malicously.
+            else if (file.AdminOnly == true || (file.Approved == true))
+            {
+                return StatusCode(500, new { message = "Your not authorized to access this file.", status = "401" });
+            }
+
+            //Otherwise return the file
             var net = new System.Net.WebClient();
             string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage";
             filePath = filePath.Replace("/", @"\");
@@ -589,6 +603,31 @@ namespace Greenwell.Controllers
             return File(content, contentType, fileName);
         }
 
+
+        [Authorize(Roles = "Administrator")]
+        [HttpPost("AdminDownloadAFile")]
+        public IActionResult AdminDownloadFile([FromForm] string filePath)
+        {
+            var file = _context.Files.SingleOrDefault(a => a.FullPath == filePath);
+            //We check to see if the files exists in the database so they download corrupted, non-existent files.
+            if (file == null)
+            {
+                return StatusCode(500, new { message = "File could not be found.", status = "403" });
+            }
+
+
+            var net = new System.Net.WebClient();
+            string localStorage = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\GreenWellLocalStorage";
+            filePath = filePath.Replace("/", @"\");
+            string finalPath = @localStorage + @"\" + @filePath;
+            var data = net.DownloadData(finalPath);
+            var content = new System.IO.MemoryStream(data);
+            var contentType = "APPLICATION/octet-stream";
+            var fileName = "ahmed.jpeg";
+            return File(content, contentType, fileName);
+        }
+
+        [Authorize(Roles = "Administrator")]
         [HttpPost("UnapprovedFiles")]
         public ActionResult UnapprovedFiles()
         {
@@ -596,7 +635,7 @@ namespace Greenwell.Controllers
             return Ok(new { files = _context.Files.Where(p => p.Approved != true).ToList() });
         }
 
-        //Rename file
+        [Authorize(Roles = "Administrator")]
         [HttpPost("ResolveApproval")]
         public async Task<ActionResult> ResolveApproval([FromForm] string fullPath, [FromForm] bool approval)
         {

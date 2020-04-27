@@ -473,14 +473,24 @@ export class Home extends Component {
             let formData = new FormData();
             formData.append("filePath", filePath)
             const token = await authService.getAccessToken();
-            const response = await fetch('api/GreenWellFiles/DownloadAFile', {
+            const response = await fetch((this.state.role == "Administrator") ? 'api/GreenWellFiles/AdminDownloadAFile' : 'api/GreenWellFiles/DownloadAFile', {
                 method: 'POST',
                 body: formData,
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             });
 
-            const blob = await response.blob();
-            saveAs(blob, fileName);
+            if (response.ok) {
+                const blob = await response.blob();
+                saveAs(blob, fileName);
+            }
+            else if (response.status === 401) {
+                console.log(response)
+                this.showAlertModal("Your not authorized to download that file.");
+            }
+            else{
+                console.log(response)
+                this.showAlertModal("Unable to download file.");
+            }
         }
         downloadFile();
     }
