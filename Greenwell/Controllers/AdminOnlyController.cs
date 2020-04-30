@@ -37,10 +37,25 @@ namespace Greenwell.Controllers
             // get all admin users
             var admins = await userManager.GetUsersInRoleAsync("Administrator");
             // exclude current admin user
-            var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList();
+            List<User> adminList = new List<User>();
+            for (int i = 0; i < admins.Count; i++)
+            {
+                var temp = admins[i];
+                adminList.Add(new User(temp.UserName, temp.Email));
+            }
+            var adminUsers = adminList.Where(a => a.email != currentUser).ToList();
+
             // get all non admin users
-            var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+            var nonAdmins = await userManager.GetUsersInRoleAsync("Member");
+            // exclude current admin user
+            List<User> nonAdminUsers = new List<User>();
+            for (int i = 0; i < nonAdmins.Count; i++)
+            {
+                var temp = nonAdmins[i];
+                nonAdminUsers.Add(new User(temp.UserName, temp.Email));
+            }
             return Ok(new { adminUsers, nonAdminUsers });
+
         }
 
         [HttpPost("DeleteUser")]
@@ -53,18 +68,32 @@ namespace Greenwell.Controllers
                 // delete the user
                 await userManager.DeleteAsync(passedUser);
 
-                // post delete
                 // get all admin users
                 var admins = await userManager.GetUsersInRoleAsync("Administrator");
                 // exclude current admin user
-                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-                // get all non admin users
-                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                List<User> adminList = new List<User>();
+                for (int i = 0; i < admins.Count; i++)
+                {
+                    IdentityUser temp = admins[i];
+                    adminList.Add(new User(temp.UserName, temp.Email));
+                }
+                var adminUsers = adminList.Where(a => a.email != currentUser).ToList();
 
+                // get all non admin users
+                var nonAdmins = await userManager.GetUsersInRoleAsync("Member");
+                // exclude current admin user
+                List<User> nonAdminUsers = new List<User>();
+                for (int i = 0; i < nonAdmins.Count; i++)
+                {
+                    IdentityUser temp = nonAdmins[i];
+                    nonAdminUsers.Add(new User(temp.UserName, temp.Email));
+                }
                 return Ok(new { adminUsers, nonAdminUsers });
+
             }
-            catch (Exception e) {
-                return StatusCode(500, new {message = "Couldn't delete user.", error = e.Message, status = "500" });
+            catch (Exception e)
+            {
+                return StatusCode(500, new { message = "Couldn't delete user.", error = e.Message, status = "500" });
             }
         }
 
@@ -84,11 +113,25 @@ namespace Greenwell.Controllers
                 // get all admin users
                 var admins = await userManager.GetUsersInRoleAsync("Administrator");
                 // exclude current admin user
-                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-                // get all non admin users
-                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                List<User> adminList = new List<User>();
+                for (int i = 0; i < admins.Count; i++)
+                {
+                    IdentityUser temp = admins[i];
+                    adminList.Add(new User(temp.UserName, temp.Email));
+                }
+                var adminUsers = adminList.Where(a => a.email != currentUser).ToList();
 
+                // get all non admin users
+                var nonAdmins = await userManager.GetUsersInRoleAsync("Member");
+                // exclude current admin user
+                List<User> nonAdminUsers = new List<User>();
+                for (int i = 0; i < nonAdmins.Count; i++)
+                {
+                    IdentityUser temp = nonAdmins[i];
+                    nonAdminUsers.Add(new User(temp.UserName, temp.Email));
+                }
                 return Ok(new { adminUsers, nonAdminUsers });
+
             }
             catch (Exception e)
             {
@@ -111,11 +154,25 @@ namespace Greenwell.Controllers
                 // get all admin users
                 var admins = await userManager.GetUsersInRoleAsync("Administrator");
                 // exclude current admin user
-                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-                // get all non admin users
-                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                List<User> adminList = new List<User>();
+                for (int i = 0; i < admins.Count; i++)
+                {
+                    IdentityUser temp = admins[i];
+                    adminList.Add(new User(temp.UserName, temp.Email));
+                }
+                var adminUsers = adminList.Where(a => a.email != currentUser).ToList();
 
+                // get all non admin users
+                var nonAdmins = await userManager.GetUsersInRoleAsync("Member");
+                // exclude current admin user
+                List<User> nonAdminUsers = new List<User>();
+                for (int i = 0; i < nonAdmins.Count; i++)
+                {
+                    IdentityUser temp = nonAdmins[i];
+                    nonAdminUsers.Add(new User(temp.UserName, temp.Email));
+                }
                 return Ok(new { adminUsers, nonAdminUsers });
+
             }
             catch (Exception e)
             {
@@ -184,7 +241,8 @@ namespace Greenwell.Controllers
                         $"You have been invited to create a Greenwell State Park Account. Please finish setting up account by creating a password <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>. You must finish setting up your account within 14 days.");
                     Debug.WriteLine(callbackUrl);
                 }
-                else {
+                else
+                {
                     return StatusCode(500, new { message = "Can't add a user that already exists.", status = "500" });
                 }
 
@@ -192,11 +250,25 @@ namespace Greenwell.Controllers
                 // get all admin users
                 var admins = await userManager.GetUsersInRoleAsync("Administrator");
                 // exclude current admin user
-                var adminUsers = admins.Where(a => a.ToString() != currentUser).ToList().AsEnumerable();
-                // get all non admin users
-                var nonAdminUsers = await userManager.GetUsersInRoleAsync("Member");
+                List<User> adminList = new List<User>();
+                for (int i = 0; i < admins.Count; i++)
+                {
+                    IdentityUser temp = admins[i];
+                    adminList.Add(new User(temp.UserName, temp.Email));
+                }
+                var adminUsers = adminList.Where(a => a.email != currentUser).ToList();
 
+                // get all non admin users
+                var nonAdmins = await userManager.GetUsersInRoleAsync("Member");
+                // exclude current admin user
+                List<User> nonAdminUsers = new List<User>();
+                for (int i = 0; i < nonAdmins.Count; i++)
+                {
+                    IdentityUser temp = nonAdmins[i];
+                    nonAdminUsers.Add(new User(temp.UserName, temp.Email));
+                }
                 return Ok(new { adminUsers, nonAdminUsers });
+
 
             }
             catch (Exception e)
@@ -251,4 +323,16 @@ namespace Greenwell.Controllers
 
 
     }
+    public class User
+    {
+        public string name { get; set; }
+        public string email { get; set; }
+        public User(String name, String email)
+        {
+            this.name = name;
+            this.email = email;
+        }
+    }
+
 }
+

@@ -406,7 +406,7 @@ render() {
                                             </React.Fragment>
                                         }
                                         </td>
-                                        <td>{adminUsers.userName}</td>
+                                        <td>{adminUsers.name}</td>
                                         <td>{adminUsers.email}</td>
                                         <td>Admin User</td>
                                     </tr>
@@ -414,7 +414,7 @@ render() {
                             }
                             {this.state.nonAdminUsers.length != 0 &&
                                 this.state.nonAdminUsers.map(nonAdminUsers =>
-                                    <tr key={nonAdminUsers.userName}>
+                                    <tr key={nonAdminUsers.name}>
                                         <td>{
                                             <React.Fragment>
                                                 <Link onClick={() => this.setState({ showDeleteUserModal: true, userInAction: nonAdminUsers.email })}>
@@ -426,7 +426,7 @@ render() {
                                             </React.Fragment>
                                         }
                                         </td>
-                                        <td>{nonAdminUsers.userName}</td>
+                                        <td>{nonAdminUsers.name}</td>
                                         <td>{nonAdminUsers.email}</td>
                                         <td>Default User</td>
                                     </tr>
