@@ -485,11 +485,13 @@ render() {
                             <tr>
                                 <th>Actions</th>
                                 <th>Filename</th>
+                                <th>Author</th>
                             </tr>
                         </thead>
                         <tbody>
                             {(this.state.files.length == 0) &&
                                 <tr>
+                                    <th>No files.</th>
                                     <th>No files.</th>
                                     <th>No files.</th>
                                 </tr>
@@ -513,13 +515,14 @@ render() {
                                         }
                                         </td>
                                         <td>{file.key.filename}</td>
-
+                                        <td>{file.key.author}</td>
                                     </tr>
                                 )
                             }
 
 
                             <tr>
+                                <th style={{ borderSpacing: "none", border: "none" }}></th>
                                 <th style={{ borderSpacing: "none", border: "none" }}></th>
                                 <th style={{ borderSpacing: "none", border: "none" }}></th>
                             </tr>

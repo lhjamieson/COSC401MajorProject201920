@@ -35,8 +35,6 @@ public class ProfileService : IProfileService
         context.IssuedClaims.Add(new Claim(JwtClaimTypes.Email, user.Email));
         context.IssuedClaims.AddRange(roleClaims);
         //Add more claims as you need
-
-        string email = user.Email;
     }
 
     public Task IsActiveAsync(IsActiveContext context)

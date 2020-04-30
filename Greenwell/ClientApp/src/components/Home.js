@@ -36,7 +36,8 @@ export class Home extends Component {
             downloadFileName: "",
             uploading: false,
             searchBy: "fileName",
-            role: null
+            role: null,
+            name: null
 
         };
         // check and create the local storage
@@ -97,7 +98,8 @@ export class Home extends Component {
         // get the state of the user and pass role of the user to previous method to get files
         const [user] = await Promise.all([authService.getUser()]);
         this.setState({
-            role: user && user.role
+            role: user && user.role,
+            name: user && user.name
         }, () => getFiles(this.state.role == "Administrator"));
     }
 
@@ -386,6 +388,7 @@ export class Home extends Component {
             formData.append("path", fullPath)
             formData.append("f", this.state.uploadFile);
             formData.append("tags", tags);
+            formData.append("author", this.state.name)
             if (document.getElementById("adminCheckBox") == null)
                 formData.append("adminAccessOnly", document.getElementById("adminCheckBox"));
             else

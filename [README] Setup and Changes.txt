@@ -20,7 +20,7 @@ When that is finished, run "update-database -context ApplicationDbContext"
 
 make sure appsettings.json has the password for your MySQL server and you should be good to go
 
-
+When reimporting the database, make sure that you also delete everything inside the GreenWellLocalStorage on your desktop as that can cause errors.
 
 IMPORTANT NOTE ABOUT ACCOUNTS:
 

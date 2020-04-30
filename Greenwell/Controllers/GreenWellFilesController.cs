@@ -165,12 +165,11 @@ namespace Greenwell.Controllers
         }
 
         //Functionality to add a file from the User for default users.
-
         [HttpPost("AddFileFromUpload")]
-        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags)
+        public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] string author,[FromForm] IFormFile f, string[] tags)
         {
 
-            if (_context.Files.Where(f => (f.FullPath.Equals(path))).Any())
+            if (_context.Files.Where(g => (g.FullPath.Equals(path))).Any())
             {
                 return Ok(new { message = "Unable to upload duplicate file.", status = "201" });
             }
@@ -212,7 +211,8 @@ namespace Greenwell.Controllers
                 {
                     FullPath = path,
                     Filename = System.IO.Path.GetFileName(path),
-                    Approved = false
+                    Approved = false,
+                    Author = author
                 };
 
 
@@ -258,15 +258,15 @@ namespace Greenwell.Controllers
             {
                 return StatusCode(500, new { error = e.Message, status = "500" });
             }
+
             //Finally we send an email to all admins about the new file, this method of handling new files is just a proof of concept.
             foreach (var email in userManager.GetUsersInRoleAsync("Administrator").Result) {
                await emailSender.SendEmailAsync(
                     email.Email,
                     "File Requiring Approval",
-                    $"A file, {path} has been uploaded with the tags: {tags.ToString()} and requires approval.");
+                    $"A file, {path} has been uploaded by {author} with the tags: {tags.ToString()} and requires approval.");
             }
             
-
             return Ok(new { message = "File was added successfully.", status = "200" });
         }
 
@@ -274,9 +274,9 @@ namespace Greenwell.Controllers
         //Functionality to add a file from the User.
         [HttpPost("AdminAddFileFromUpload")]
         [Authorize(Roles = "Administrator")]
-        public async Task<ActionResult> AdminAddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags, bool adminAccessOnly)
+        public async Task<ActionResult> AdminAddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, [FromForm] string author, string[] tags, bool adminAccessOnly)
         {
-            if (_context.Files.Where(f => (f.FullPath.Equals(path))).Any())
+            if (_context.Files.Where(g => (g.FullPath.Equals(path))).Any())
             {
                 return Ok(new { message = "Unable to upload duplicate file.", status = "201" });
             }
@@ -320,6 +320,7 @@ namespace Greenwell.Controllers
                     FullPath = path,
                     Filename = System.IO.Path.GetFileName(path),
                     AdminOnly = adminAccessOnly,
+                    Author = author,
                     Approved = true
                 };
 

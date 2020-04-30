@@ -17,7 +17,6 @@ namespace Greenwell.Data.Models
         public virtual DbSet<Files> Files { get; set; }
         public virtual DbSet<Tagmap> Tagmap { get; set; }
         public virtual DbSet<Tags> Tags { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -36,15 +35,9 @@ namespace Greenwell.Data.Models
 
                 entity.ToTable("files", "greenwelldatabase");
 
-                entity.HasIndex(e => e.Author)
-                    .HasName("author");
 
                 entity.Property(e => e.FileId)
                     .HasColumnName("fileID")
-                    .HasColumnType("int(11)");
-
-                entity.Property(e => e.Author)
-                    .HasColumnName("author")
                     .HasColumnType("int(11)");
 
                 entity.Property(e => e.ExtType)
@@ -62,6 +55,12 @@ namespace Greenwell.Data.Models
                     .HasColumnName("fullPath")
                     .HasMaxLength(100)
                     .IsUnicode(false);
+                
+                entity.Property(e => e.Author)
+                    .HasColumnName("author")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
 
                 entity.Property(e => e.UploadDate)
                     .HasColumnName("uploadDate")
@@ -75,10 +74,8 @@ namespace Greenwell.Data.Models
                     .HasColumnName("approved")
                     .HasColumnType("boolean");
 
-                entity.HasOne(d => d.AuthorNavigation)
-                    .WithMany(p => p.Files)
-                    .HasForeignKey(d => d.Author)
-                    .HasConstraintName("files_ibfk_2");
+
+
             });
 
             modelBuilder.Entity<Tagmap>(entity =>
@@ -129,28 +126,6 @@ namespace Greenwell.Data.Models
                 entity.Property(e => e.TagName)
                     .HasColumnName("tagName")
                     .HasMaxLength(30)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<Users>(entity =>
-            {
-                entity.HasKey(e => e.UserId);
-
-                entity.ToTable("users", "greenwelldatabase");
-
-                entity.Property(e => e.UserId)
-                    .HasColumnName("userID")
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.UserName)
-                    .HasColumnName("userName")
-                    .HasMaxLength(30)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.UserRole)
-                    .HasColumnName("userRole")
-                    .HasMaxLength(8)
                     .IsUnicode(false);
             });
         }
