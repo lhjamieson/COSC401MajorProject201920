@@ -32,9 +32,10 @@ export class AdminOnly extends Component {
 
         let getUsers = async () => {
             const [user] = await Promise.all([authService.getUser()]);
+            console.log(user);
             const token = await authService.getAccessToken();
             let formData = new FormData();
-            formData.append("currentUser", user.name);
+            formData.append("currentUser", user.email);
             const response = await fetch('api/AdminOnly/GetUsers', {
                 method: 'POST',
                 body: formData,
@@ -146,7 +147,7 @@ deleteAUser = async (userToDelete) => {
     const [user] = await Promise.all([authService.getUser()]);
     const token = await authService.getAccessToken();
     let formData = new FormData();
-    formData.append("currentUser", user.name);
+    formData.append("currentUser", user.email);
     formData.append("userToDelete", userToDelete);
     const response = await fetch('api/AdminOnly/DeleteUser', {
         method: 'POST',
@@ -175,7 +176,7 @@ makeUserAdmin = async (userToMakeAdmin) => {
     const [user] = await Promise.all([authService.getUser()]);
     const token = await authService.getAccessToken();
     let formData = new FormData();
-    formData.append("currentUser", user.name);
+    formData.append("currentUser", user.email);
     formData.append("userToMakeAdmin", userToMakeAdmin);
     const response = await fetch('api/AdminOnly/MakeUserAdmin', {
         method: 'POST',
@@ -204,7 +205,7 @@ makeUserNonAdmin = async (userToMakeNonAdmin) => {
     const [user] = await Promise.all([authService.getUser()]);
     const token = await authService.getAccessToken();
     let formData = new FormData();
-    formData.append("currentUser", user.name);
+    formData.append("currentUser", user.email);
     formData.append("userToMakeNonAdmin", userToMakeNonAdmin);
     const response = await fetch('api/AdminOnly/MakeUserNonAdmin', {
         method: 'POST',
@@ -246,7 +247,7 @@ addUser = async (userToAdd, userName) => {
     const [user] = await Promise.all([authService.getUser()]);
     const token = await authService.getAccessToken();
     let formData = new FormData();
-    formData.append("currentUser", user.name);
+    formData.append("currentUser", user.email);
     formData.append("userEmail", userToAdd);
     formData.append("userName", userName);
     const response = await fetch('api/AdminOnly/AddUser', {

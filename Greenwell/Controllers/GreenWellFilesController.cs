@@ -6,8 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Greenwell.Data;
 using Greenwell.Data.Models;
+using Greenwell.Models;
+using Greenwell.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
@@ -21,9 +25,14 @@ namespace Greenwell.Controllers
     public class GreenWellFilesController : Controller
     {
         private readonly greenwelldatabaseContext _context;
-        public GreenWellFilesController(greenwelldatabaseContext context)
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IEmailSender emailSender;
+
+        public GreenWellFilesController(greenwelldatabaseContext context, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _context = context;
+            this.userManager = userManager;
+            this.emailSender = emailSender;
         }
 
         //Return all files from the Database and add to a list excluding admin only.
@@ -157,7 +166,6 @@ namespace Greenwell.Controllers
 
         //Functionality to add a file from the User for default users.
 
-            //TODO Add email notication about file being uploaded.
         [HttpPost("AddFileFromUpload")]
         public async Task<ActionResult> AddFileFromUpload([FromForm] string path, [FromForm] IFormFile f, string[] tags)
         {
@@ -166,7 +174,7 @@ namespace Greenwell.Controllers
             {
                 return Ok(new { message = "Unable to upload duplicate file.", status = "201" });
             }
-            
+
             try
             {
                 //If there are tags associated with the file, split at commas to create a list.
@@ -250,6 +258,15 @@ namespace Greenwell.Controllers
             {
                 return StatusCode(500, new { error = e.Message, status = "500" });
             }
+            //Finally we send an email to all admins about the new file, this method of handling new files is just a proof of concept.
+            foreach (var email in userManager.GetUsersInRoleAsync("Administrator").Result) {
+               await emailSender.SendEmailAsync(
+                    email.Email,
+                    "File Requiring Approval",
+                    $"A file, {path} has been uploaded with the tags: {tags.ToString()} and requires approval.");
+            }
+            
+
             return Ok(new { message = "File was added successfully.", status = "200" });
         }
 
