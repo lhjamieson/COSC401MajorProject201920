@@ -36,7 +36,7 @@ namespace Greenwell
         {
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(
+                options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDbContext<greenwelldatabaseContext>(
@@ -46,7 +46,7 @@ namespace Greenwell
                      mySqlOptions =>
                      {
                          mySqlOptions.MigrationsAssembly("Greenwell/Data");
-                         mySqlOptions.ServerVersion(new Version(8, 0, 17), ServerType.MySql); // replace with your Server Version and Type
+                         mySqlOptions.ServerVersion(new Version(5, 6, 46), ServerType.MySql); // replace with your Server Version and Type
                      }
                  )
              );
