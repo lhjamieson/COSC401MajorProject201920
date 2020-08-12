@@ -5,3 +5,12 @@ C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Deb
 C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
 C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.dll
 C:\Users\th3wa\Documents\GitHub\COSC401MajorProject201920\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.pdb
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.deps.json
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Debug\netcoreapp3.1\Greenwell.Data.pdb
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.csprojAssemblyReference.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.csproj.CoreCompileInputs.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfoInputs.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Debug\netcoreapp3.1\Greenwell.Data.pdb

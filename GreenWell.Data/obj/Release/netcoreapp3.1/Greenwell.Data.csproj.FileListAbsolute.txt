@@ -1,0 +1,9 @@
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Release\netcoreapp3.1\Greenwell.Data.deps.json
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Release\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\bin\Release\netcoreapp3.1\Greenwell.Data.pdb
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.csprojAssemblyReference.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.csproj.CoreCompileInputs.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.AssemblyInfoInputs.cache
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.AssemblyInfo.cs
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.dll
+C:\Users\ahkha\Downloads\COSC401MajorProject201920-master\COSC401MajorProject201920-master\Greenwell.Data\obj\Release\netcoreapp3.1\Greenwell.Data.pdb

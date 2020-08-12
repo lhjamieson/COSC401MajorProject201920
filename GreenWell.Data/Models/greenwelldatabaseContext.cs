@@ -23,8 +23,8 @@ namespace Greenwell.Data.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySQL("server=localhost;port=3306;database=greenwelldatabase;user=root;password=3000;database=greenwelldatabase");
+                //optionsBuilder.UseMySQL("Server=localhost:3306;Database=greenwelldatabase;user=root;password=Thisisatest1;");
+                optionsBuilder.UseMySQL("Server=localhost:3306;Database=cfogarty_1;Uid=cfoga_cfogarty;Pwd=Rosedale#$66;");
             }
         }
 
