@@ -1,0 +1,42 @@
+info: IdentityServer4.Startup[0]
+      Starting IdentityServer4 version 3.0.0.0
+info: IdentityServer4.Startup[0]
+      Using explicitly configured authentication scheme Identity.Application for IdentityServer
+dbug: IdentityServer4.Startup[0]
+      Using Identity.Application as default ASP.NET Core scheme for authentication
+dbug: IdentityServer4.Startup[0]
+      Using Identity.External as default ASP.NET Core scheme for sign-in
+dbug: IdentityServer4.Startup[0]
+      Using Identity.External as default ASP.NET Core scheme for sign-out
+dbug: IdentityServer4.Startup[0]
+      Using Identity.Application as default ASP.NET Core scheme for challenge
+dbug: IdentityServer4.Startup[0]
+      Using Identity.Application as default ASP.NET Core scheme for forbid
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'Greenwell.Data.ApplicationDbContext'.
+      System.ArgumentException: Keyword not supported: 'port'.
+         at Microsoft.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+         at Microsoft.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms)
+         at Microsoft.Data.SqlClient.SqlConnectionString..ctor(String connectionString)
+         at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnectionOptions(String connectionString, DbConnectionOptions previous)
+         at Microsoft.Data.ProviderBase.DbConnectionFactory.GetConnectionPoolGroup(DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolOptions, DbConnectionOptions& userConnectionOptions)
+         at Microsoft.Data.SqlClient.SqlConnection.ConnectionString_Set(DbConnectionPoolKey key)
+         at Microsoft.Data.SqlClient.SqlConnection.set_ConnectionString(String value)
+         at Microsoft.Data.SqlClient.SqlConnection..ctor(String connectionString)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerConnection.CreateDbConnection()
+         at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.get_DbConnection()
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.CreateCommand(RelationalCommandParameterObject parameterObject, Guid commandId, DbCommandMethod commandMethod)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(DbContext _, Boolean result, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.QueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+System.ArgumentException: Keyword not supported: 'port'.
+   at Microsoft.Data.Common.DbConnectionOptions.ParseInternal(Dictionary`2 parsetable, String connectionString, Boolean buildChain, Dictionary`2 synonyms, Boolean firstKey)
+   at Microsoft.Data.Common.DbConnectionOptions..ctor(String connectionString, Dictionary`2 synonyms)
+   at Microsoft.Data.SqlClient.SqlConnectionString..ctor(String connectionString)
+   at Microsoft.Data.SqlClient.SqlConnectionFactory.CreateConnectionOptions(String connectionString, DbConnectionOptions previous)
+   at Microsoft.Data.ProviderBase.DbConnectionFactory.GetConnectionPoolGroup(DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolOptions, DbConnectionOptions& userConnectionOptions)
+   at Microsoft.Data.SqlClient.SqlConnection.ConnectionString_Set(DbConnectionPoolKey key)
+   at Microsoft.Data.SqlClient.SqlConnection.set_ConnectionString(String value)
+   at Microsoft.Data.SqlClient.SqlConnection..ctor(String connectionString)
+   at Microsoft.EntityFrameworkCore.SqlServe
