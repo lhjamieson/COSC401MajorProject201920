@@ -25,7 +25,7 @@ namespace Greenwell.Services
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress("Admin@GreenwellFoundation.org", Options.SendGridUser),
+                From = new EmailAddress("gwfexecutivedirector@gmail.com", Options.SendGridUser),
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message
